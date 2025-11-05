@@ -1,13 +1,14 @@
+    const cors = require('cors');
     const express = require('express');
     const app = express();
     const PORT = process.env.PORT || 35827;
 
-    // Middleware to parse JSON request bodies
     app.use(express.json());
+    app.use(cors());
 
     // Define Wines
     app.get('/wines', (req, res) => {
-        wine = [{
+        const wines = [{
             wineID: 1,
             wineName: "Iron Orchard",
             wineVariety: "Cabernet Sauvignon",
@@ -15,12 +16,12 @@
             winePrice: '75.00',
             grapeRegion: "Napa Valley"
         }]
-        res.json(wine);
+        res.json(wines);
     });
 
     // Define Members
     app.get('/members', (req, res) => {
-        member = [{
+        members = [{
             memberID: 1,
             memberName: "Ava Morrison",
             email: "amorrison@email.com",
@@ -30,7 +31,7 @@
             memberZipCode: "80201",
             phoneNumber: "5035555555"
         }]
-        res.json(member);
+        res.json(members);
     });
 
     // Start the server
