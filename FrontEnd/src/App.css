@@ -5,38 +5,28 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+table {
+  width: 100%; /* Makes the table span the full width of its container */
+  border-collapse: collapse; /* Collapses borders between cells */
+  margin-bottom: 1em; /* Adds some space below the table */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+th, td {
+  border: 1px solid #ddd; /* Light grey border for cells */
+  padding: 8px; /* Padding inside cells */
+  text-align: left; /* Aligns text to the left */
+  color: black;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+th {
+  background-color: #e8730d; /* Orange background for table headers */
+  font-weight: bold; /* Bold text for headers */
 }
 
-.card {
-  padding: 2em;
+tr:nth-child(even) {
+  background-color: #f9f9f9; /* Zebra striping for even rows */
 }
 
-.read-the-docs {
-  color: #888;
+tr:hover {
+  background-color: #e6e6e6; /* Highlight row on hover */
 }
