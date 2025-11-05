@@ -6,9 +6,8 @@
     app.use(express.json());
     app.use(cors());
 
-    // Define Wines
-    app.get('/wines', (req, res) => {
-        const wines = [
+    // List of wines
+    const wines = [
         {
             wineID: 1,
             wineName: "Iron Orchard",
@@ -42,12 +41,19 @@
             grapeRegion: "Yakima Valley"
         }
     ]
+
+    // Define Wines
+    app.get('/wines', (req, res) => {
         res.json(wines);
     });
 
-    // Define Members
-    app.get('/members', (req, res) => {
-        members = [
+    // Delete wine
+    app.delete('/wines/:wineID', (req, res) => {
+        res.status(200).json({ message: 'Wine deleted' });
+    });
+
+    // List of members
+    const members = [
         {
             memberID: 1,
             memberName: "Ava Morrison",
@@ -79,12 +85,19 @@
             phoneNumber: "3035555555"
         }
         ]
+    
+    // Define Members
+    app.get('/members', (req, res) => {
         res.json(members);
     });
 
-    // Define CreditCards
-    app.get('/creditcards', (req, res) => {
-        creditCards = [
+    // Delete member
+    app.delete('/members/:memberID', (req, res) => {
+        res.status(200).json({ message: 'Member deleted' });
+        });
+
+    // List of credit cards
+    const creditCards = [
         {
             cardID: 1,
             memberID: 2,
@@ -109,9 +122,99 @@
             cardExpirationDate: "03/01/2027",
             billingZipCode: "80123"
         }
-        ]
+    ]
+
+    // Define CreditCards
+    app.get('/creditcards', (req, res) => {
         res.json(creditCards);
     });
+
+    // Delete credit card
+    app.delete('/creditcards/:cardID', (req, res) => {
+        res.status(200).json({ message: 'Credit Card deleted' });
+        });
+
+    // List of orders
+    const orders = [
+        {
+            orderID: 1,
+            memberID: 2,
+            cardID: 1,
+            orderDate: "3/13/2025",
+            orderPrice: "$75.00",
+            hasShipped: "True"
+        },
+        {
+            orderID: 2,
+            memberID: 1,
+            cardID: 3,
+            orderDate: "7/25/2025",
+            orderPrice: "$95.00",
+            hasShipped: "True"
+        },
+        {
+            orderID: 3,
+            memberID: 3,
+            cardID: 2,
+            orderDate: "9/9/2025",
+            orderPrice: "$100.00",
+            hasShipped: "True"
+        },
+        {
+            orderID: 4,
+            memberID: 1,
+            cardID: 3,
+            orderDate: "10/31/202",
+            orderPrice: "$150.00",
+            hasShipped: "False"
+        }
+    ]
+
+    // Define Orders
+    app.get('/orders', (req, res) => {
+        res.json(orders);
+    });
+
+    // Delete order
+    app.delete('/orders/:orderID', (req, res) => {
+        res.status(200).json({ message: 'Order deleted' });
+        });
+
+    // List of shipments
+    const shipments = [
+        {
+            shipmentID: 1,
+            orderID: 1,
+            shipmentDate: "3/23/2025",
+            carrier: "UPS",
+            trackingNumber: "1Z5727545669644096"
+        },
+        {
+            shipmentID: 2,
+            orderID: 2,
+            shipmentDate: "8/3/2025",
+            carrier: "UPS",
+            trackingNumber: "1Z6593664850639875"
+        },
+        {
+            shipmentID: 3,
+            orderID: 3,
+            shipmentDate: "9/18/2025",
+            carrier: "FedEx",
+            trackingNumber: "847953969991"
+        }
+    ]
+    
+    // Define Shipments
+    app.get('/shipments', (req, res) => {
+        res.json(shipments);
+    });
+
+    // Delete shipment
+    app.delete('/shipments/:shipmentID', (req, res) => {
+        res.status(200).json({ message: 'Shipment deleted' });
+        });
+
 
     // Start the server
     app.listen(PORT, () => {

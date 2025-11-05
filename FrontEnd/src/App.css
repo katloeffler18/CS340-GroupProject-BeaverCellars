@@ -30,3 +30,11 @@ tr:nth-child(even) {
 tr:hover {
   background-color: #e6e6e6; /* Highlight row on hover */
 }
+
+button {
+  color: "white";
+  background: "red";
+  border: "none"; 
+  padding: "6px 10px";
+  border-radius: "5px" ;
+}

@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 
-function WineItem({ wine }) {
-  return (
-    <tr>
-    <td>{wine.wineID}</td>
-    <td>{wine.wineName}</td>
-    <td>{wine.wineVariety}</td>
-    <td>{wine.wineYear}</td>
-    <td>${wine.winePrice}</td>
-    <td>{wine.grapeRegion}</td>
-    </tr>
-  )
-}
-
 function Wines() {
   const [data, setData] = useState([]);
 
@@ -43,6 +30,16 @@ function Wines() {
     fetchWines();
   }, []); 
 
+  // Delete handler
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
+
+    await fetch(`http://localhost:35827/wines/${id}`, { method: "DELETE" });
+    console.log(data.filter(wine => wine.wineID !== id));
+    setData(data.filter(wine => wine.wineID !== id));
+  };
+
     return (
       <>
           <table>
@@ -54,16 +51,35 @@ function Wines() {
               <th>Year</th>
               <th>Price</th>
               <th>Region</th>
+              <th>Actions</th>
               </tr>
           </thead>
           <tbody>
             {data.map((wine) => (
-              <WineItem key={wine.wineID} wine={wine} />
+              <WineItem key={wine.wineID} wine={wine} handleDelete={handleDelete}/>
             ))}
           </tbody>
         </table>
       </>
     )
+}
+
+function WineItem({ wine, handleDelete}) {
+  return (
+    <tr>
+    <td>{wine.wineID}</td>
+    <td>{wine.wineName}</td>
+    <td>{wine.wineVariety}</td>
+    <td>{wine.wineYear}</td>
+    <td>${wine.winePrice}</td>
+    <td>{wine.grapeRegion}</td>
+    <td>
+      <button
+        onClick={() => handleDelete(wine.wineID)}>Delete
+      </button>
+    </td>
+    </tr>
+  )
 }
 
 export default Wines
