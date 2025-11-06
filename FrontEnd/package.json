@@ -12,7 +12,9 @@
     "stop_production": "npx forever stop reactServer.cjs"
   },
   "dependencies": {
+    "express": "^4.21.2",
     "forever": "^4.0.3",
+    "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.5"
