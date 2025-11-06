@@ -180,6 +180,55 @@
         res.status(200).json({ message: 'Order deleted' });
         });
 
+    // List of wines in orders
+    const winesOrders = [
+        {
+            winesOrdersID: 1,
+            orderID: 1,
+            wineID: 1,
+            wineQuantity: 1,
+            price: "75.00"
+        },
+        {
+            winesOrdersID: 2,
+            orderID: 2,
+            wineID: 2,
+            wineQuantity: 1,
+            price: "60.00"
+        },
+        {
+            winesOrdersID: 3,
+            orderID: 2,
+            wineID: 4,
+            wineQuantity: 1,
+            price: "35.00"
+        },
+        {
+            winesOrdersID: 4,
+            orderID: 3,
+            wineID: 3,
+            wineQuantity: 2,
+            price: "100.00"
+        },
+        {
+            winesOrdersID: 5,
+            orderID: 4,
+            wineID: 1,
+            wineQuantity: 2,
+            price: "150.00"
+        }
+    ]
+
+    // Define WinesOrders
+    app.get('/winesorders', (req, res) => {
+        res.json(winesOrders);
+    });
+
+    // Delete wine order
+    app.delete('/winesorders/:winesOrdersID', (req, res) => {
+        res.status(200).json({ message: 'Wine deleted from order' });
+        });
+
     // List of shipments
     const shipments = [
         {

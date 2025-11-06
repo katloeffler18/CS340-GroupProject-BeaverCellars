@@ -6,7 +6,7 @@
 }
 
 table {
-  width: 80%; /* Makes the table span the full width of its container */
+  table-layout: auto;
   border-collapse: collapse; /* Collapses borders between cells */
   margin: 50px auto; 
   align-content: center;
