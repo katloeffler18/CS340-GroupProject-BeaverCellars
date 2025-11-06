@@ -23,7 +23,7 @@ function WinesOrders() {
   useEffect(() => {
     const fetchWinesOrders = async () => {
       try {
-      const response = await fetch("http://localhost:35827/winesorders", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/winesorders", {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -51,7 +51,7 @@ function WinesOrders() {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
 
-    await fetch(`http://localhost:35827/winesorders/${id}`, { method: "DELETE" });
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/winesorders/${id}`, { method: "DELETE" });
     console.log(data.filter(wineOrder => wineOrder.winesOrdersID !== id));
     setData(data.filter(wineOrder => wineOrder.winesOrdersID !== id));
   };
@@ -74,7 +74,7 @@ function WinesOrders() {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(`http://localhost:35827/winesorders/${editingWine.winesOrdersID}`, {
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/winesorders/${editingWine.winesOrdersID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -90,7 +90,7 @@ function WinesOrders() {
 
   const handleAdd = async () => {
     try {
-      const response = await fetch("http://localhost:35827/winesorders", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/winesorders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newWine),

@@ -46,7 +46,7 @@ function Members() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-      const response = await fetch("http://localhost:35827/members", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/members", {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -74,7 +74,7 @@ function Members() {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
 
-    await fetch(`http://localhost:35827/members/${id}`, { method: "DELETE" });
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/members/${id}`, { method: "DELETE" });
     console.log(data.filter(member => member.memberID !== id));
     setData(data.filter(member => member.memberID !== id));
   };
@@ -100,7 +100,7 @@ function Members() {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(`http://localhost:35827/members/${editingMember.memberID}`, {
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/members/${editingMember.memberID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -116,7 +116,7 @@ function Members() {
 
   const handleAdd = async () => {
     try {
-      const response = await fetch("http://localhost:35827/members", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newMember),

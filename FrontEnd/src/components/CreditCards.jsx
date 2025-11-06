@@ -40,7 +40,7 @@ function CreditCards() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-      const response = await fetch("http://localhost:35827/creditcards", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/creditcards", {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -68,7 +68,7 @@ function CreditCards() {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
 
-    await fetch(`http://localhost:35827/creditcards/${id}`, { method: "DELETE" });
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/creditcards/${id}`, { method: "DELETE" });
     console.log(data.filter(creditCard => creditCard.cardID !== id));
     setData(data.filter(creditCard => creditCard.cardID !== id));
   };
@@ -92,7 +92,7 @@ function CreditCards() {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(`http://localhost:35827/creditcards/${editingCreditCard.cardID}`, {
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/creditcards/${editingCreditCard.cardID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -108,7 +108,7 @@ function CreditCards() {
 
   const handleAdd = async () => {
     try {
-      const response = await fetch("http://localhost:35827/creditcards", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/creditcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newCreditCard),

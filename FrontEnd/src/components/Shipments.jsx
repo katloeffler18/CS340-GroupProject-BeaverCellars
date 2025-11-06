@@ -38,7 +38,7 @@ function Shipments() {
   useEffect(() => {
     const fetchShipments = async () => {
       try {
-      const response = await fetch("http://localhost:35827/shipments", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/shipments", {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -66,7 +66,7 @@ function Shipments() {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
 
-    await fetch(`http://localhost:35827/shipments/${id}`, { method: "DELETE" });
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/shipments/${id}`, { method: "DELETE" });
     console.log(data.filter(shipment => shipment.shipmentID !== id));
     setData(data.filter(shipment => shipment.shipmentID !== id));
   };
@@ -89,7 +89,7 @@ function Shipments() {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(`http://localhost:35827/shipments/${editingShipment.shipmentID}`, {
+    await fetch(`http://classwork.engr.oregonstate.edu:35827/shipments/${editingShipment.shipmentID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -105,7 +105,7 @@ function Shipments() {
 
   const handleAdd = async () => {
     try {
-      const response = await fetch("http://localhost:35827/shipments", {
+      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/shipments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newShipment),
