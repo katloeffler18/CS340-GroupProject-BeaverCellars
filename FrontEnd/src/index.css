@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #ffffff;
+  background-color: #f0f0f0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,6 +19,7 @@ nav {
   color: #000000;
   text-decoration: inherit;
 }
+
 nav a:hover {
   background-color: #e8730d;
 }
