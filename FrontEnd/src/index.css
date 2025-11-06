@@ -1,25 +1,9 @@
 :root {
   font-family: Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
   background-color: #f0f0f0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-nav {
-  font-weight: bold;
-  font-size: 24px;
-  color: #000000;
-  text-decoration: inherit;
-}
-
-nav a:hover {
-  background-color: #e8730d;
 }

@@ -6,13 +6,10 @@
 }
 
 table {
-  width: 90%; /* Makes the table span the full width of its container */
+  width: 80%; /* Makes the table span the full width of its container */
   border-collapse: collapse; /* Collapses borders between cells */
-  margin-bottom: 1em; /* Adds some space below the table */
-  position: absolute;
-  top: 50%;
-  left: 50%; /* For horizontal centering as well */
-  transform: translate(-50%, -50%); /* Adjusts for the element's own size */
+  margin: 50px auto; 
+  align-content: center;
 }
 
 th, td {
@@ -39,6 +36,7 @@ tr:hover {
 .topnav {
   background-color: #333;
   overflow: hidden;
+  font-weight: bold;
 }
 
 /* Style the links inside the navigation bar */
@@ -57,11 +55,36 @@ tr:hover {
   color: black;
 }
 
-h1 {
+.header {
   font-weight: bold;
   font-size: 56px;
   margin: 0px;
   color: #e8730d;
   text-decoration: inherit;
+  text-align: left;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 38px;
+  margin: 0px;
+  text-decoration: inherit;
+  text-align: center;
+}
+
+h3 {
+  color: "black";
+}
+
+button {
+  background-color: #4d4d4d;
+  color: #ffffff;
+  border-radius: 6px;
+  margin: 2px;
+}
+
+caption {
+  font-weight: bold;
+  font-size: 28px;
   text-align: left;
 }
