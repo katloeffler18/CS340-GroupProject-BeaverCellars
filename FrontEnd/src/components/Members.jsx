@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import '../App.css'
 
-
-function MemberItem({ member }) {
+function MemberItem({ member, handleDelete, handleEdit }) {
   return (
     <tr>
     <td>{member.memberID}</td>
@@ -12,12 +12,36 @@ function MemberItem({ member }) {
     <td>{member.state}</td>
     <td>{member.memberZipCode}</td>
     <td>{member.phoneNumber}</td>
+    <td>
+      <button onClick={() => handleEdit(member)}>Edit</button>
+      <button onClick={() => handleDelete(member.memberID)}>Delete</button>
+    </td>
     </tr>
   )
 }
 
 function Members() {
   const [data, setData] = useState([]);
+  const [editingMember, setEditingMember] = useState(null);
+  const [formData, setFormData] = useState({
+    memberName: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    memberZipCode: "",
+    phoneNumber: "",
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMember, setNewMember] = useState({
+    memberName: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    memberZipCode: "",
+    phoneNumber: "",
+  });
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -45,10 +69,87 @@ function Members() {
     fetchMembers();
   }, []); 
 
+  // Delete handler
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
+
+    await fetch(`http://localhost:35827/members/${id}`, { method: "DELETE" });
+    console.log(data.filter(member => member.memberID !== id));
+    setData(data.filter(member => member.memberID !== id));
+  };
+
+  // Edit handler
+  const handleEdit = (member) => {
+    setEditingMember(member);
+    setFormData({
+      memberName: member.memberName,
+      email: member.email,
+      address: member.address,
+      city: member.city,
+      state: member.state,
+      memberZipCode: member.memberZipCode,
+      phoneNumber: member.phoneNumber,
+    });
+  };
+
+// Update form
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Submit edit
+  const handleUpdate = async () => {
+    await fetch(`http://localhost:35827/members/${editingMember.memberID}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    setData((prev) =>
+      prev.map((member) =>
+        member.memberID === editingMember.memberID ? { ...member, ...formData } : member
+      )
+    );
+    setEditingMember(null);
+  };
+
+  const handleAdd = async () => {
+    try {
+      const response = await fetch("http://localhost:35827/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMember),
+      });
+
+      if (!response.ok) throw new Error(`Error adding member: ${response.status}`);
+
+      const addedMember = await response.json();
+
+      // Update table instantly
+      setData((prev) => [...prev, addedMember]);
+      setShowAddForm(false);
+
+      // Reset form
+      setNewMember({
+        memberName: "",
+        email: "",
+        address: "",
+        city: "",
+        state: "",
+        memberZipCode: "",
+        phoneNumber: "",
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
     return (
       <>
           <table>
-          <thead>
+            <caption>Members</caption>
+            <thead>
               <tr>
               <th>ID</th>
               <th>Name</th>
@@ -58,14 +159,119 @@ function Members() {
               <th>State</th>
               <th>Zip Code</th>
               <th>Phone Number</th>
+              <th>Actions</th>
               </tr>
           </thead>
           <tbody>
             {data.map((member) => (
-              <MemberItem key={member.memberID} member={member} />
+              <MemberItem key={member.memberID} member={member} handleDelete={handleDelete} handleEdit={handleEdit}/>
             ))}
           </tbody>
         </table>
+        <button onClick={() => setShowAddForm(true)}>Add New Member</button>
+        {showAddForm && (
+          <div>
+            <h3>Add New Member</h3>
+            <div>
+              <input
+                name="memberName"
+                value={newMember.memberName}
+                onChange={(e) => setNewMember({ ...newMember, memberName: e.target.value })}
+                placeholder="Name"
+              />
+              <input
+                name="email"
+                value={newMember.email}
+                onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                placeholder="Email"
+              />
+              <input
+                name="address"
+                value={newMember.address}
+                onChange={(e) => setNewMember({ ...newMember, address: e.target.value })}
+                placeholder="Address"
+              />
+              <input
+                name="city"
+                value={newMember.city}
+                onChange={(e) => setNewMember({ ...newMember, city: e.target.value })}
+                placeholder="City"
+              />
+              <input
+                name="state"
+                value={newMember.state}
+                onChange={(e) => setNewMember({ ...newMember, state: e.target.value })}
+                placeholder="State"
+              />
+              <input
+                name="memberZipCode"
+                value={newMember.memberZipCode}
+                onChange={(e) => setNewMember({ ...newMember, memberZipCode: e.target.value })}
+                placeholder="Zip Code"
+              />              
+              <input
+                name="phoneNumber"
+                value={newMember.phoneNumber}
+                onChange={(e) => setNewMember({ ...newMember, phoneNumber: e.target.value })}
+                placeholder="Phone Number"
+              /> 
+              <div style={{ marginTop: "0.5rem" }}>
+                <button onClick={handleAdd}>Save</button>
+                <button onClick={() => setShowAddForm(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingMember && (
+          <div>
+            <h3>Edit Member: {editingMember.memberName}</h3>
+            <input
+              name="memberName"
+              value={formData.memberName}
+              onChange={handleChange}
+              placeholder="Name"
+            />
+            <input
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+            />
+            <input
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Address"
+            />
+            <input
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              placeholder="City"
+            />
+            <input
+              name="state"
+              value={formData.state}
+              onChange={handleChange}
+              placeholder="State"
+            />
+            <input
+              name="memberZipCode"
+              value={formData.memberZipCode}
+              onChange={handleChange}
+              placeholder="Zip Code"
+            />
+            <input
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="Phone Number"
+            />            
+            <button onClick={handleUpdate}>Save</button>
+            <button onClick={() => setEditingMember(null)}>Cancel</button>
+          </div>
+      )}
       </>
     )
 }

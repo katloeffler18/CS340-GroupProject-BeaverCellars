@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import '../App.css'
 
 
+function WineItem({ wine, handleDelete, handleEdit}) {
+  return (
+    <tr>
+    <td>{wine.wineID}</td>
+    <td>{wine.wineName}</td>
+    <td>{wine.wineVariety}</td>
+    <td>{wine.wineYear}</td>
+    <td>${wine.winePrice}</td>
+    <td>{wine.grapeRegion}</td>
+    <td>
+      <button onClick={() => handleEdit(wine)}>Edit</button>
+      <button onClick={() => handleDelete(wine.wineID)}>Delete</button>
+    </td>
+    </tr>
+  )
+}
+
 function Wines() {
   const [data, setData] = useState([]);
   const [editingWine, setEditingWine] = useState(null);
@@ -224,23 +241,6 @@ function Wines() {
       )}
       </>
     )
-}
-
-function WineItem({ wine, handleDelete, handleEdit}) {
-  return (
-    <tr>
-    <td>{wine.wineID}</td>
-    <td>{wine.wineName}</td>
-    <td>{wine.wineVariety}</td>
-    <td>{wine.wineYear}</td>
-    <td>${wine.winePrice}</td>
-    <td>{wine.grapeRegion}</td>
-    <td>
-      <button onClick={() => handleEdit(wine)}>Edit</button>
-      <button onClick={() => handleDelete(wine.wineID)}>Delete</button>
-    </td>
-    </tr>
-  )
 }
 
 export default Wines
