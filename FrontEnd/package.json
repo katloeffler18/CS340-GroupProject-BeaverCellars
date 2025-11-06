@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "production": "npx forever start reactServer.cjs",
+    "stop_production": "npx forever stop reactServer.cjs"
   },
   "dependencies": {
+    "forever": "^4.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.5"
