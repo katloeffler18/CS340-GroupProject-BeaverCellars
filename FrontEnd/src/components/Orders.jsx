@@ -18,7 +18,7 @@ function OrderItem({ order, handleDelete, handleEdit }) {
   )
 }
 
-function Orders() {
+function Orders(url) {
   const [data, setData] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
   const [formData, setFormData] = useState({
@@ -40,7 +40,7 @@ function Orders() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/orders", {
+      const response = await fetch(url.url + ":35827/orders", {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -68,7 +68,7 @@ function Orders() {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
 
-    await fetch(`http://classwork.engr.oregonstate.edu:35827/orders/${id}`, { method: "DELETE" });
+    await fetch(url.url + `:35827/orders/${id}`, { method: "DELETE" });
     console.log(data.filter(order => order.orderID !== id));
     setData(data.filter(order => order.orderID !== id));
   };
@@ -92,7 +92,7 @@ function Orders() {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(`http://classwork.engr.oregonstate.edu:35827/orders/${editingOrder.orderID}`, {
+    await fetch(url.url + `:35827/orders/${editingOrder.orderID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -108,7 +108,7 @@ function Orders() {
 
   const handleAdd = async () => {
     try {
-      const response = await fetch("http://classwork.engr.oregonstate.edu:35827/orders", {
+      const response = await fetch(url.url + ":35827/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newOrder),

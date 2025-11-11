@@ -101,6 +101,7 @@
         {
             cardID: 1,
             memberID: 2,
+            memberName: 'Jessie Hale',
             cardName: "Jessie Hale",
             cardNumber: "1928554249773270",
             cardExpirationDate: "06/01/2027",
@@ -109,6 +110,7 @@
         {
             cardID: 2,
             memberID: 3,
+            memberName: 'Lucas Avery',
             cardName: "Lauren Avery",
             cardNumber: "6079515370416374",
             cardExpirationDate: "08/01/2028",
@@ -117,6 +119,7 @@
         {
             cardID: 3,
             memberID: 1,
+            memberName: 'Ava Morrison',
             cardName: "Ava Morrison",
             cardNumber: "4265852982433821",
             cardExpirationDate: "03/01/2027",

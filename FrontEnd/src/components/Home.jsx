@@ -36,7 +36,7 @@ function HomePage() {
         Welcome! This database backend system will allow Beaver Cellars to 
         efficiently track members, manage inventory, process orders, 
         and coordinate shipments. Use the navigation above to view, add, 
-        edit, or delete Wines, Members, Credit Cards, Orders, and Shipments.
+        edit, or delete Wines, Members, Credit Cards, Orders, Order Details, and Shipments.
       </p>
     </div>
   );

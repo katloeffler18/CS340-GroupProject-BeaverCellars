@@ -9,7 +9,7 @@ import WinesOrders from './components/WinesOrders';
 import Shipments from './components/Shipments';
 
 function App() {
-
+  const url = "http://localhost";
   return (
     <Router>
       <header>
@@ -21,12 +21,12 @@ function App() {
         </nav>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/wines" element={<Wines />} />
-        <Route path="/members" element={<Members />} />
-        <Route path="/creditcards" element={<CreditCards />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/winesorders" element={<WinesOrders />} />
-        <Route path="/shipments" element={<Shipments />} />
+        <Route path="/wines" element={<Wines url={url}/>} />
+        <Route path="/members" element={<Members url={url}/>} />
+        <Route path="/creditcards" element={<CreditCards url={url}/>} />
+        <Route path="/orders" element={<Orders url={url}/>} />
+        <Route path="/winesorders" element={<WinesOrders url={url}/>} />
+        <Route path="/shipments" element={<Shipments url={url}/>} />
       </Routes>
       </header>
     </Router>
