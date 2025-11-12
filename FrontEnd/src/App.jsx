@@ -9,7 +9,7 @@ import WinesOrders from './components/WinesOrders';
 import Shipments from './components/Shipments';
 
 function App() {
-  const url = "http://localhost";
+  const url = "http://classwork.engr.oregonstate.edu";
   return (
     <Router>
       <header>
