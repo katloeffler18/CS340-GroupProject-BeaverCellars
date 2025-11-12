@@ -2,11 +2,28 @@ import React, { useState, useEffect } from 'react';
 import '../App.css'
 
 
+function WineOrderItem({ wineOrder, handleDelete, handleEdit}) {
+  return (
+    <tr>
+    <td>{wineOrder.winesOrdersID}</td>
+    <td>{wineOrder.orderID}</td>
+    <td>{wineOrder.memberName}</td>
+    <td>{wineOrder.wineID}</td>
+    <td>{wineOrder.wineName}</td>
+    <td>{wineOrder.wineQuantity}</td>
+    <td>${wineOrder.price}</td>
+    <td>
+      <button onClick={() => handleEdit(wineOrder)}>Edit</button>
+      <button onClick={() => handleDelete(wineOrder.winesOrdersID)}>Delete</button>
+    </td>
+    </tr>
+  )
+}
+
 function WinesOrders(url) {
   const [data, setData] = useState([]);
   const [editingWine, setEditingWine] = useState(null);
   const [formData, setFormData] = useState({
-    orderID: "",
     wineID: "",
     wineQuantity: "",
     price: "",
@@ -60,7 +77,6 @@ function WinesOrders(url) {
   const handleEdit = (wineOrder) => {
     setEditingWine(wineOrder);
     setFormData({
-      orderID: wineOrder.orderID,
       wineID: wineOrder.wineID,
       wineQuantity: wineOrder.wineQuantity,
       price: wineOrder.price,
@@ -124,7 +140,9 @@ function WinesOrders(url) {
               <tr>
               <th>ID</th>
               <th>Order ID</th>
+              <th>Member Name</th>
               <th>Wine ID</th>
+              <th>Wine Name</th>
               <th>Quantity</th>
               <th>Price</th>
               <th>Actions</th>
@@ -136,36 +154,38 @@ function WinesOrders(url) {
             ))}
           </tbody>
         </table>
-        <button onClick={() => setShowAddForm(true)}>Add New Wine to Order</button>
+        <button onClick={() => setShowAddForm(true)}>Add Wine to Existing Order</button>
         {showAddForm && (
-          <div>
-            <h3>Add New Wine to Order</h3>
+          <div className='form'>
             <div>
-              <input
-                name="orderID"
-                value={newWine.orderID}
-                onChange={(e) => setNewWine({ ...newWine, orderID: e.target.value })}
-                placeholder="Order ID"
-              />
-              <input
-                name="wineID"
-                value={newWine.wineID}
-                onChange={(e) => setNewWine({ ...newWine, wineID: e.target.value })}
-                placeholder="Wine ID"
-              />
+            <label htmlFor="orderID">Order ID: </label>
+              <select defaultValue="Order ID" id="dropdown" name="orderID" onChange={(e) => setNewWine({ ...newWine, orderID: e.target.value })}>
+                 <option disabled>Order ID</option>
+                 {data.map((wineOrder) => (<option key={wineOrder.orderID} value={wineOrder.orderID}>{wineOrder.orderID}</option>))}
+              </select>
+            <br></br>
+            <label htmlFor="wineName">Wine Name: </label>
+              <select defaultValue="Wine Name" id="dropdown" name="wineName" onChange={(e) => setNewWine({ ...newWine, wineID: e.target.value })}>
+                 <option disabled>Wine Name</option>
+                 {data.map((wineOrder) => (<option key={wineOrder.wineID} value={wineOrder.wineID}>{wineOrder.wineName}</option>))}
+              </select>
+              <br></br>
+              <label htmlFor="wineQuantity">Wine Quantity: </label>
               <input
                 name="wineQuantity"
                 value={newWine.wineQuantity}
                 onChange={(e) => setNewWine({ ...newWine, wineQuantity: e.target.value })}
                 placeholder="Quantity"
               />
+              <br></br>
+              <label htmlFor="price">Price: </label>
               <input
                 name="price"
                 value={newWine.price}
                 onChange={(e) => setNewWine({ ...newWine, price: e.target.value })}
                 placeholder="Price"
               />
-
+              <br></br>
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={handleAdd}>Save</button>
                 <button onClick={() => setShowAddForm(false)}>Cancel</button>
@@ -175,33 +195,30 @@ function WinesOrders(url) {
         )}
 
         {editingWine && (
-          <div>
+          <div className='form'>
             <h3>Edit Wine in Order: {editingWine.winesOrdersID}</h3>
-            <input
-              name="orderID"
-              value={formData.orderID}
-              onChange={handleChange}
-              placeholder="Order ID"
-            />
-            <input
-              name="wineID"
-              value={formData.wineID}
-              onChange={handleChange}
-              placeholder="Wine ID"
-            />
+            <label htmlFor="wineID">Wine Name: </label>
+            <select id="dropdown" name="wineID" value={formData.wineID} onChange={handleChange}>
+              <option disabled value="">Select Wine</option>
+              {data.map((wineOrder) => (<option key={wineOrder.wineID} value={wineOrder.wineID}>{wineOrder.wineName}</option>))}
+            </select>
+            <br></br>
+            <label htmlFor="wineQuantity">Wine Quantity: </label>
             <input
               name="wineQuantity"
               value={formData.wineQuantity}
               onChange={handleChange}
               placeholder="Quantity"
             />
+            <br></br>
+            <label htmlFor="price">Price: </label>
             <input
               name="price"
               value={formData.price}
               onChange={handleChange}
               placeholder="Price"
             />
-
+            <br></br>
             <button onClick={handleUpdate}>Save</button>
             <button onClick={() => setEditingWine(null)}>Cancel</button>
           </div>
@@ -210,21 +227,6 @@ function WinesOrders(url) {
     )
 }
 
-function WineOrderItem({ wineOrder, handleDelete, handleEdit}) {
-  return (
-    <tr>
-    <td>{wineOrder.winesOrdersID}</td>
-    <td>{wineOrder.orderID}</td>
-    <td>{wineOrder.wineID}</td>
-    <td>{wineOrder.wineQuantity}</td>
-    <td>${wineOrder.price}</td>
-    <td>
-      <button onClick={() => handleEdit(wineOrder)}>Edit</button>
-      <button onClick={() => handleDelete(wineOrder.winesOrdersID)}>Delete</button>
-    </td>
-    </tr>
-  )
-}
 
 export default WinesOrders
 

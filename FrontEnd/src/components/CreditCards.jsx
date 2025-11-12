@@ -162,7 +162,6 @@ function CreditCards(url) {
         <button onClick={() => setShowAddForm(true)}>Add New Credit Card</button>
         {showAddForm && (
           <div>
-            <h3>Add New Credit Card</h3>
             <div className='form'>
             <label for="memberName">Member Name: </label>
               <select defaultValue="Member Name" id="dropdown" name="memberName" onChange={(e) => setNewCreditCard({ ...newCreditCard, memberID: e.target.value })}>

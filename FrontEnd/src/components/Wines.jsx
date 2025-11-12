@@ -161,39 +161,47 @@ function Wines(url) {
         <button onClick={() => setShowAddForm(true)}>Add New Wine</button>
         {showAddForm && (
           <div>
-            <h3>Add New Wine</h3>
             <div>
+              <label for="wineName">Name: </label>
               <input
                 name="wineName"
                 value={newWine.wineName}
                 onChange={(e) => setNewWine({ ...newWine, wineName: e.target.value })}
                 placeholder="Name"
               />
+              <br></br>
+              <label for="wineVariety">Variety: </label>
               <input
                 name="wineVariety"
                 value={newWine.wineVariety}
                 onChange={(e) => setNewWine({ ...newWine, wineVariety: e.target.value })}
                 placeholder="Variety"
               />
+              <br></br>
+              <label for="wineYear">Year: </label>              
               <input
                 name="wineYear"
                 value={newWine.wineYear}
                 onChange={(e) => setNewWine({ ...newWine, wineYear: e.target.value })}
                 placeholder="Year"
               />
+              <br></br>
+              <label for="winePrice">Price: </label>  
               <input
                 name="winePrice"
                 value={newWine.winePrice}
                 onChange={(e) => setNewWine({ ...newWine, winePrice: e.target.value })}
                 placeholder="Price"
               />
+              <br></br>
+              <label for="grapeRegion">Grape Region: </label> 
               <input
                 name="grapeRegion"
                 value={newWine.grapeRegion}
                 onChange={(e) => setNewWine({ ...newWine, grapeRegion: e.target.value })}
                 placeholder="Region"
               />
-
+              <br></br>
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={handleAdd}>Save</button>
                 <button onClick={() => setShowAddForm(false)}>Cancel</button>
@@ -205,36 +213,46 @@ function Wines(url) {
         {editingWine && (
           <div>
             <h3>Edit Wine: {editingWine.wineName}</h3>
+            <label for="wineName">Name: </label>
             <input
               name="wineName"
               value={formData.wineName}
               onChange={handleChange}
               placeholder="Name"
             />
+            <br></br>
+            <label for="wineVariety">Variety: </label>
             <input
               name="wineVariety"
               value={formData.wineVariety}
               onChange={handleChange}
               placeholder="Variety"
             />
+            <br></br>
+            <label for="wineYear">Year: </label> 
             <input
               name="wineYear"
               value={formData.wineYear}
               onChange={handleChange}
               placeholder="Year"
             />
+            <br></br>
+            <label for="winePrice">Price: </label>
             <input
               name="winePrice"
               value={formData.winePrice}
               onChange={handleChange}
               placeholder="Price"
             />
+            <br></br>
+            <label for="grapeRegion">Grape Region: </label> 
             <input
               name="grapeRegion"
               value={formData.grapeRegion}
               onChange={handleChange}
               placeholder="Region"
             />
+            <br></br>
             <button onClick={handleUpdate}>Save</button>
             <button onClick={() => setEditingWine(null)}>Cancel</button>
           </div>

@@ -142,7 +142,9 @@
         {
             orderID: 1,
             memberID: 2,
+            memberName: "Jessie Hale",
             cardID: 1,
+            cardName: "Jessie Hale",
             orderDate: "3/13/2025",
             orderPrice: "$75.00",
             hasShipped: "True"
@@ -150,7 +152,9 @@
         {
             orderID: 2,
             memberID: 1,
+            memberName: "Ava Morrison",
             cardID: 3,
+            cardName: "Ava Morrison",
             orderDate: "7/25/2025",
             orderPrice: "$95.00",
             hasShipped: "True"
@@ -158,7 +162,9 @@
         {
             orderID: 3,
             memberID: 3,
+            memberName: "Lucas Avery",
             cardID: 2,
+            cardName: "Lauren Avery",
             orderDate: "9/9/2025",
             orderPrice: "$100.00",
             hasShipped: "True"
@@ -166,8 +172,10 @@
         {
             orderID: 4,
             memberID: 1,
+            memberName: "Ava Morrison",
             cardID: 3,
-            orderDate: "10/31/202",
+            cardName: "Ava Morrison",
+            orderDate: "10/31/2025",
             orderPrice: "$150.00",
             hasShipped: "False"
         }
@@ -188,35 +196,45 @@
         {
             winesOrdersID: 1,
             orderID: 1,
+            memberName: "Jessie Hale",
             wineID: 1,
+            wineName: "Iron Orchard",
             wineQuantity: 1,
             price: "75.00"
         },
         {
             winesOrdersID: 2,
             orderID: 2,
+            memberName: "Ava Morrison",
             wineID: 2,
+            wineName: "Rogue Vineyard",
             wineQuantity: 1,
             price: "60.00"
         },
         {
             winesOrdersID: 3,
             orderID: 2,
+            memberName: "Ava Morrison",
             wineID: 4,
+            wineName: "Clear Creek",
             wineQuantity: 1,
             price: "35.00"
         },
         {
             winesOrdersID: 4,
             orderID: 3,
+            memberName: "Lucas Avery",
             wineID: 3,
+            wineName: "Morning Slate",
             wineQuantity: 2,
             price: "100.00"
         },
         {
             winesOrdersID: 5,
             orderID: 4,
+            memberName: "Jessie Hale",
             wineID: 1,
+            wineName: "Iron Orchard",
             wineQuantity: 2,
             price: "150.00"
         }
@@ -237,6 +255,7 @@
         {
             shipmentID: 1,
             orderID: 1,
+            memberName: "Jessie Hale",
             shipmentDate: "3/23/2025",
             carrier: "UPS",
             trackingNumber: "1Z5727545669644096"
@@ -244,6 +263,7 @@
         {
             shipmentID: 2,
             orderID: 2,
+            memberName: "Ava Morrison",
             shipmentDate: "8/3/2025",
             carrier: "UPS",
             trackingNumber: "1Z6593664850639875"
@@ -251,6 +271,7 @@
         {
             shipmentID: 3,
             orderID: 3,
+            memberName: "Lucas Avery",            
             shipmentDate: "9/18/2025",
             carrier: "FedEx",
             trackingNumber: "847953969991"

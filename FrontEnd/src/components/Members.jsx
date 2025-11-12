@@ -171,50 +171,63 @@ function Members(url) {
         <button onClick={() => setShowAddForm(true)}>Add New Member</button>
         {showAddForm && (
           <div>
-            <h3>Add New Member</h3>
             <div>
+              <label for="memberName">Name: </label>
               <input
                 name="memberName"
                 value={newMember.memberName}
                 onChange={(e) => setNewMember({ ...newMember, memberName: e.target.value })}
                 placeholder="Name"
               />
+              <br></br>
+              <label for="email">Email: </label>
               <input
                 name="email"
                 value={newMember.email}
                 onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
                 placeholder="Email"
               />
+              <br></br>
+              <label for="address">Address: </label>              
               <input
                 name="address"
                 value={newMember.address}
                 onChange={(e) => setNewMember({ ...newMember, address: e.target.value })}
                 placeholder="Address"
               />
+              <br></br>
+              <label for="city">City: </label>              
               <input
                 name="city"
                 value={newMember.city}
                 onChange={(e) => setNewMember({ ...newMember, city: e.target.value })}
                 placeholder="City"
               />
+              <br></br>
+              <label for="state">State: </label>
               <input
                 name="state"
                 value={newMember.state}
                 onChange={(e) => setNewMember({ ...newMember, state: e.target.value })}
                 placeholder="State"
               />
+              <br></br>
+              <label for="memberZipCode">Zip Code: </label>
               <input
                 name="memberZipCode"
                 value={newMember.memberZipCode}
                 onChange={(e) => setNewMember({ ...newMember, memberZipCode: e.target.value })}
                 placeholder="Zip Code"
-              />              
+              /> 
+              <br></br>
+              <label for="phoneNumber">Phone Number: </label>             
               <input
                 name="phoneNumber"
                 value={newMember.phoneNumber}
                 onChange={(e) => setNewMember({ ...newMember, phoneNumber: e.target.value })}
                 placeholder="Phone Number"
               /> 
+              <br></br>
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={handleAdd}>Save</button>
                 <button onClick={() => setShowAddForm(false)}>Cancel</button>
@@ -226,48 +239,62 @@ function Members(url) {
         {editingMember && (
           <div>
             <h3>Edit Member: {editingMember.memberName}</h3>
+            <label for="memberName">Name: </label>
             <input
               name="memberName"
               value={formData.memberName}
               onChange={handleChange}
               placeholder="Name"
             />
+            <br></br>
+            <label for="email">Email: </label>
             <input
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
             />
+            <br></br>
+            <label for="address">Address: </label> 
             <input
               name="address"
               value={formData.address}
               onChange={handleChange}
               placeholder="Address"
             />
+            <br></br>
+            <label for="city">City: </label>
             <input
               name="city"
               value={formData.city}
               onChange={handleChange}
               placeholder="City"
             />
+            <br></br>
+            <label for="state">State: </label>
             <input
               name="state"
               value={formData.state}
               onChange={handleChange}
               placeholder="State"
             />
+            <br></br>
+            <label for="memberZipCode">Zip Code: </label>
             <input
               name="memberZipCode"
               value={formData.memberZipCode}
               onChange={handleChange}
               placeholder="Zip Code"
             />
+            <br></br>
+            <label for="phoneNumber">Phone Number: </label>
             <input
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder="Phone Number"
-            />            
+            />
+            <br></br>            
             <button onClick={handleUpdate}>Save</button>
             <button onClick={() => setEditingMember(null)}>Cancel</button>
           </div>
