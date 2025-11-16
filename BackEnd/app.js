@@ -2,93 +2,49 @@
     const express = require('express');
     const app = express();
     const PORT = process.env.PORT || 35827;
+    const db = require('./db-connector');
+
 
     app.use(express.json());
     app.use(cors());
 
-    // List of wines
-    const wines = [
-        {
-            wineID: 1,
-            wineName: "Iron Orchard",
-            wineVariety: "Cabernet Sauvignon",
-            wineYear: 2022,
-            winePrice: '75.00',
-            grapeRegion: "Napa Valley"
-        },
-        {
-            wineID: 2,
-            wineName: "Rogue Vineyard",
-            wineVariety: "Chardonnay",
-            wineYear: 2020,
-            winePrice: '60.00',
-            grapeRegion: "Rogue Valley"
-        },
-        {
-            wineID: 3,
-            wineName: "Morning Slate",
-            wineVariety: "Pinot Noir",
-            wineYear: 2018,
-            winePrice: '50.00',
-            grapeRegion: "Willamette Valley"
-        },
-        {
-            wineID: 4,
-            wineName: "Clear Creek",
-            wineVariety: "Pinot Gris",
-            wineYear: 2023,
-            winePrice: '35.00',
-            grapeRegion: "Yakima Valley"
-        }
-    ]
 
     // Define Wines
-    app.get('/wines', (req, res) => {
-        res.json(wines);
+    app.get('/wines', async (req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_wines()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete wine
-    app.delete('/wines/:wineID', (req, res) => {
-        res.status(200).json({ message: 'Wine deleted' });
+    app.delete('/wines/:wineID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_wine(${req.params.wineID})`);
+            res.status(200).json({ message: 'Wine deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
+        
     });
 
-    // List of members
-    const members = [
-        {
-            memberID: 1,
-            memberName: "Ava Morrison",
-            email: "amorrison@email.com",
-            address: "3748 Lone Tree Rd",
-            city: "Denver",
-            state: "CO",
-            memberZipCode: "80201",
-            phoneNumber: "5035555555"
-        },
-        {
-            memberID: 2,
-            memberName: "Jessie Hale",
-            email: "jess-hale-18@email.com",
-            address: "88821 Church St",
-            city: "Nashville",
-            state: "TN",
-            memberZipCode: "37027",
-            phoneNumber: "6155555555"
-        },
-        {
-            memberID: 3,
-            memberName: "Lucas Avery",
-            email: "lucasavery5@email.com",
-            address: "147 Aspen Ct",
-            city: "Portland",
-            state: "OR",
-            memberZipCode: "97203",
-            phoneNumber: "3035555555"
-        }
-        ]
     
-    // Define Members
-    app.get('/members', (req, res) => {
-        res.json(members);
+    // Get Members
+    app.get('/members', async (req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_members()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete member
@@ -96,40 +52,17 @@
         res.status(200).json({ message: 'Member deleted' });
         });
 
-    // List of credit cards
-    const creditCards = [
-        {
-            cardID: 1,
-            memberID: 2,
-            memberName: 'Jessie Hale',
-            cardName: "Jessie Hale",
-            cardNumber: "1928554249773270",
-            cardExpirationDate: "06/01/2027",
-            billingZipCode: "37027"
-        },
-        {
-            cardID: 2,
-            memberID: 3,
-            memberName: 'Lucas Avery',
-            cardName: "Lauren Avery",
-            cardNumber: "6079515370416374",
-            cardExpirationDate: "08/01/2028",
-            billingZipCode: "97203"
-        },
-        {
-            cardID: 3,
-            memberID: 1,
-            memberName: 'Ava Morrison',
-            cardName: "Ava Morrison",
-            cardNumber: "4265852982433821",
-            cardExpirationDate: "03/01/2027",
-            billingZipCode: "80123"
-        }
-    ]
 
-    // Define CreditCards
-    app.get('/creditcards', (req, res) => {
-        res.json(creditCards);
+    // Get CreditCards
+    app.get('/creditcards', async (req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_creditcards()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete credit card
@@ -137,53 +70,17 @@
         res.status(200).json({ message: 'Credit Card deleted' });
         });
 
-    // List of orders
-    const orders = [
-        {
-            orderID: 1,
-            memberID: 2,
-            memberName: "Jessie Hale",
-            cardID: 1,
-            cardName: "Jessie Hale",
-            orderDate: "3/13/2025",
-            orderPrice: "$75.00",
-            hasShipped: "True"
-        },
-        {
-            orderID: 2,
-            memberID: 1,
-            memberName: "Ava Morrison",
-            cardID: 3,
-            cardName: "Ava Morrison",
-            orderDate: "7/25/2025",
-            orderPrice: "$95.00",
-            hasShipped: "True"
-        },
-        {
-            orderID: 3,
-            memberID: 3,
-            memberName: "Lucas Avery",
-            cardID: 2,
-            cardName: "Lauren Avery",
-            orderDate: "9/9/2025",
-            orderPrice: "$100.00",
-            hasShipped: "True"
-        },
-        {
-            orderID: 4,
-            memberID: 1,
-            memberName: "Ava Morrison",
-            cardID: 3,
-            cardName: "Ava Morrison",
-            orderDate: "10/31/2025",
-            orderPrice: "$150.00",
-            hasShipped: "False"
-        }
-    ]
 
-    // Define Orders
-    app.get('/orders', (req, res) => {
-        res.json(orders);
+    // Get Orders
+    app.get('/orders', async(req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_orders()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete order
@@ -191,58 +88,17 @@
         res.status(200).json({ message: 'Order deleted' });
         });
 
-    // List of wines in orders
-    const winesOrders = [
-        {
-            winesOrdersID: 1,
-            orderID: 1,
-            memberName: "Jessie Hale",
-            wineID: 1,
-            wineName: "Iron Orchard",
-            wineQuantity: 1,
-            price: "75.00"
-        },
-        {
-            winesOrdersID: 2,
-            orderID: 2,
-            memberName: "Ava Morrison",
-            wineID: 2,
-            wineName: "Rogue Vineyard",
-            wineQuantity: 1,
-            price: "60.00"
-        },
-        {
-            winesOrdersID: 3,
-            orderID: 2,
-            memberName: "Ava Morrison",
-            wineID: 4,
-            wineName: "Clear Creek",
-            wineQuantity: 1,
-            price: "35.00"
-        },
-        {
-            winesOrdersID: 4,
-            orderID: 3,
-            memberName: "Lucas Avery",
-            wineID: 3,
-            wineName: "Morning Slate",
-            wineQuantity: 2,
-            price: "100.00"
-        },
-        {
-            winesOrdersID: 5,
-            orderID: 4,
-            memberName: "Jessie Hale",
-            wineID: 1,
-            wineName: "Iron Orchard",
-            wineQuantity: 2,
-            price: "150.00"
-        }
-    ]
 
-    // Define WinesOrders
-    app.get('/winesorders', (req, res) => {
-        res.json(winesOrders);
+    // Get WinesOrders
+    app.get('/winesorders', async (req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_winesorders()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete wine order
@@ -250,37 +106,17 @@
         res.status(200).json({ message: 'Wine deleted from order' });
         });
 
-    // List of shipments
-    const shipments = [
-        {
-            shipmentID: 1,
-            orderID: 1,
-            memberName: "Jessie Hale",
-            shipmentDate: "3/23/2025",
-            carrier: "UPS",
-            trackingNumber: "1Z5727545669644096"
-        },
-        {
-            shipmentID: 2,
-            orderID: 2,
-            memberName: "Ava Morrison",
-            shipmentDate: "8/3/2025",
-            carrier: "UPS",
-            trackingNumber: "1Z6593664850639875"
-        },
-        {
-            shipmentID: 3,
-            orderID: 3,
-            memberName: "Lucas Avery",            
-            shipmentDate: "9/18/2025",
-            carrier: "FedEx",
-            trackingNumber: "847953969991"
-        }
-    ]
     
-    // Define Shipments
-    app.get('/shipments', (req, res) => {
-        res.json(shipments);
+    // Get Shipments
+    app.get('/shipments', async (req, res) => {
+        try {
+            const [rows] = await db.query("call sp_get_shipments()")
+            res.status(200).json(rows[0])
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
     });
 
     // Delete shipment

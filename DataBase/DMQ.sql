@@ -11,7 +11,7 @@
 SELECT wineID, wineName, wineVariety, wineYear, winePrice, grapeRegion FROM Wines;
 
 -- Select Members table
-SELECT memberID, memberName, email, city, state, phoneNumber FROM Members;
+SELECT memberID, memberName, email, address, city, state, memberZipCode, phoneNumber FROM Members;
 
 -- Select CreditCards table
 SELECT CreditCards.cardID, CreditCards.memberID, Members.memberName, CreditCards.cardName, CreditCards.cardNumber, CreditCards.cardExpirationDate, CreditCards.billingZipCode

@@ -85,7 +85,7 @@ CREATE TABLE Shipments (
 CREATE TABLE WinesOrders (
     winesOrdersID INT AUTO_INCREMENT NOT NULL UNIQUE,
     orderID INT NOT NULL,
-    wineID INT NOT NULL,
+    wineID INT,
     wineQuantity INT NOT NULL,
     price DECIMAL(6,2) NOT NULL,
     PRIMARY KEY (winesOrdersID),
@@ -93,7 +93,7 @@ CREATE TABLE WinesOrders (
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
     FOREIGN KEY (wineID) REFERENCES Wines(wineID)
-        ON DELETE RESTRICT
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 );
 
