@@ -9,7 +9,7 @@ function OrderItem({ order, handleDelete, handleEdit }) {
       <td>{order.memberName}</td>
       <td>{order.cardID}</td>
       <td>{order.cardName}</td>
-      <td>{order.orderDate}</td>
+      <td>{new Date(order.orderDate).toLocaleDateString()}</td>
       <td>${order.orderPrice}</td>
       <td>{order.hasShipped}</td>
       <td>
