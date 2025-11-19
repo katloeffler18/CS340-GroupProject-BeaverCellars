@@ -7,7 +7,7 @@ function ShipmentItem({ shipment, handleDelete }) {
       <td>{shipment.shipmentID}</td>
       <td>{shipment.orderID}</td>
       <td>{shipment.memberName}</td>
-      <td>{shipment.shipmentDate}</td>
+      <td>{new Date(shipment.shipmentDate).toLocaleDateString()}</td>
       <td>{shipment.carrier}</td>
       <td>{shipment.trackingNumber}</td>
       <td>

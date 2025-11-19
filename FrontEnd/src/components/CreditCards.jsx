@@ -9,7 +9,7 @@ function CreditCardItem({ creditCard, handleDelete, handleEdit }) {
     <td>{creditCard.memberName}</td>
     <td>{creditCard.cardName}</td>
     <td>{creditCard.cardNumber}</td>
-    <td>{creditCard.cardExpirationDate}</td>
+    <td>{new Date(creditCard.cardExpirationDate).toLocaleDateString()}</td>
     <td>{creditCard.billingZipCode}</td>
     <td>
       <button onClick={() => handleEdit(creditCard)}>Edit</button>
