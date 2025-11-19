@@ -10,27 +10,63 @@ import Shipments from './components/Shipments';
 
 function App() {
   const url = "http://classwork.engr.oregonstate.edu";
+
+  // RESET DATABASE BUTTON HANDLER
+  const handleReset = async () => {
+    const confirmReset = window.confirm(
+      "Are you sure you want to RESET the entire database? This cannot be undone."
+    );
+    if (!confirmReset) return;
+
+    try {
+      const response = await fetch(`${url}/reset-database`, {
+        method: "POST"
+      });
+
+      if (response.ok) {
+        alert("Database reset successfully!");
+      } else {
+        alert("Error resetting database.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error while resetting database.");
+    }
+  };
+
   return (
     <Router>
       <header>
         <h1 className='header'>Beaver Cellars</h1>
         <nav className="topnav">
-          <Link to="/">Home</Link><Link to="/wines">Wines</Link><Link to="/members">Members</Link> 
-          <Link to="/creditcards">Credit Cards</Link><Link to="/orders">Orders</Link><Link to="/winesorders">Order Details</Link>
-          <Link to="/shipments">Shipments</Link>  
+          <Link to="/">Home</Link>
+          <Link to="/wines">Wines</Link>
+          <Link to="/members">Members</Link>
+          <Link to="/creditcards">Credit Cards</Link>
+          <Link to="/orders">Orders</Link>
+          <Link to="/winesorders">Order Details</Link>
+          <Link to="/shipments">Shipments</Link>
+
+          <button 
+            className="reset-btn" 
+            onClick={handleReset}
+          >
+            Reset
+          </button>
         </nav>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/wines" element={<Wines url={url}/>} />
-        <Route path="/members" element={<Members url={url}/>} />
-        <Route path="/creditcards" element={<CreditCards url={url}/>} />
-        <Route path="/orders" element={<Orders url={url}/>} />
-        <Route path="/winesorders" element={<WinesOrders url={url}/>} />
-        <Route path="/shipments" element={<Shipments url={url}/>} />
-      </Routes>
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/wines" element={<Wines url={url}/>} />
+          <Route path="/members" element={<Members url={url}/>} />
+          <Route path="/creditcards" element={<CreditCards url={url}/>} />
+          <Route path="/orders" element={<Orders url={url}/>} />
+          <Route path="/winesorders" element={<WinesOrders url={url}/>} />
+          <Route path="/shipments" element={<Shipments url={url}/>} />
+        </Routes>
       </header>
     </Router>
   );
 }
 
-export default App
+export default App;
