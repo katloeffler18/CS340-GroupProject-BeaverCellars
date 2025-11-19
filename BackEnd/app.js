@@ -21,6 +21,7 @@
         }
     });
 
+    
     // Delete wine
     app.delete('/wines/:wineID', async (req, res) => {
         try {
@@ -47,6 +48,7 @@
         }
     });
 
+
     // Delete member
     app.delete('/members/:memberID', (req, res) => {
         res.status(200).json({ message: 'Member deleted' });
@@ -64,6 +66,7 @@
             res.status(500).send("An error occurred while executing the database queries.");
         }
     });
+
 
     // Delete credit card
     app.delete('/creditcards/:cardID', (req, res) => {
@@ -83,6 +86,7 @@
         }
     });
 
+
     // Delete order
     app.delete('/orders/:orderID', (req, res) => {
         res.status(200).json({ message: 'Order deleted' });
@@ -100,6 +104,7 @@
             res.status(500).send("An error occurred while executing the database queries.");
         }
     });
+
 
     // Delete wine order
     app.delete('/winesorders/:winesOrdersID', (req, res) => {
@@ -119,10 +124,26 @@
         }
     });
 
+
     // Delete shipment
     app.delete('/shipments/:shipmentID', (req, res) => {
         res.status(200).json({ message: 'Shipment deleted' });
         });
+
+
+    // RESET DATABASE
+    app.post('/reset-database', async (req, res) => {
+        try {
+            const [rows] = await db.query("CALL ResetBeaverCellars()");
+            res.status(200).json({
+                message: "Database reset successfully",
+                result: rows
+            });
+        } catch (error) {
+            console.error("Error resetting database:", error);
+            res.status(500).send("An error occurred while resetting the database.");
+        }
+    });
 
 
     // Start the server
