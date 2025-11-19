@@ -10,7 +10,7 @@ function OrderItem({ order, handleDelete, handleEdit }) {
       <td>{order.cardID}</td>
       <td>{order.cardName}</td>
       <td>{order.orderDate}</td>
-      <td>{order.orderPrice}</td>
+      <td>${order.orderPrice}</td>
       <td>{order.hasShipped}</td>
       <td>
         <button onClick={() => handleEdit(order)}>Edit</button>
