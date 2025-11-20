@@ -25,6 +25,7 @@ function App() {
 
       if (response.ok) {
         alert("Database reset successfully!");
+        window.location.reload();
       } else {
         alert("Error resetting database.");
       }
