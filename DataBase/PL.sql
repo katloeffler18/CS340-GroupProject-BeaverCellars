@@ -188,10 +188,10 @@ DELIMITER ;
 
 
 -- Delete credit card from CreditCards table
-DROP PROCEDURE IF EXISTS sp_delete_creditcard;
+DROP PROCEDURE IF EXISTS sp_delete_card;
 DELIMITER //
 
-CREATE PROCEDURE sp_delete_creditcard(IN p_creditcardID INT)
+CREATE PROCEDURE sp_delete_card(IN p_cardID INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -200,7 +200,7 @@ BEGIN
     END;
 
     START TRANSACTION;
-    DELETE FROM `CreditCards` WHERE `creditCardID` = p_creditcardID;
+    DELETE FROM `CreditCards` WHERE `cardID` = p_cardID;
     COMMIT;
 
     SELECT 'Credit card deleted' AS Result;

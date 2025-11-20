@@ -85,7 +85,7 @@
     // Delete credit card
     app.delete('/creditcards/:cardID', async (req, res) => {
         try {
-            await db.query(`call sp_delete_creditcard(${req.params.creditCardID})`);
+            await db.query(`call sp_delete_card(${req.params.cardID})`);
             res.status(200).json({ message: 'Credit card deleted' });
 
         } catch (error) {
