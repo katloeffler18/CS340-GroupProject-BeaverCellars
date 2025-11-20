@@ -19,7 +19,7 @@ function App() {
     if (!confirmReset) return;
 
     try {
-      const response = await fetch(`${url}/reset-database`, {
+      const response = await fetch(`${url}:35827/reset-database`, {
         method: "POST"
       });
 
