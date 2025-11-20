@@ -135,8 +135,15 @@
 
 
     // Delete wine order
-    app.delete('/winesorders/:winesOrdersID', (req, res) => {
-        res.status(200).json({ message: 'Wine deleted from order' });
+    app.delete('/winesorders/:winesOrdersID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_winesorder(${req.params.winesOrdersID})`);
+            res.status(200).json({ message: 'Wine order deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
         });
 
     
@@ -154,8 +161,15 @@
 
 
     // Delete shipment
-    app.delete('/shipments/:shipmentID', (req, res) => {
-        res.status(200).json({ message: 'Shipment deleted' });
+    app.delete('/shipments/:shipmentID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_shipment(${req.params.shipmentID})`);
+            res.status(200).json({ message: 'Shipment deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
         });
 
 

@@ -230,10 +230,10 @@ DELIMITER ;
 
 
 -- Delete wine order from WinesOrders table
-DROP PROCEDURE IF EXISTS sp_delete_wineorder;
+DROP PROCEDURE IF EXISTS sp_delete_winesorders;
 DELIMITER //
 
-CREATE PROCEDURE sp_delete_wineorder(IN p_wineorderID INT)
+CREATE PROCEDURE sp_delete_winesorder(IN p_winesOrdersID INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -242,7 +242,7 @@ BEGIN
     END;
 
     START TRANSACTION;
-    DELETE FROM `WinesOrders` WHERE `wineorderID` = p_wineorderID;
+    DELETE FROM `WinesOrders` WHERE `winesOrdersID` = p_winesOrdersID;
     COMMIT;
 
     SELECT 'Wine order deleted' AS Result;
