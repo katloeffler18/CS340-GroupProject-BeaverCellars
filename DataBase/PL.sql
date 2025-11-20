@@ -145,7 +145,8 @@ DELIMITER ;
 -- DELETES
 -- ===========================================
 
--- Delete wine form Wines table
+-- Delete wine from Wines table
+DROP PROCEDURE IF EXISTS sp_delete_wine;
 DELIMITER //
 
 CREATE PROCEDURE sp_delete_wine(IN p_wineID INT)
@@ -161,5 +162,110 @@ BEGIN
     COMMIT;
 
     SELECT 'Wine deleted' AS Result;
+END //
+DELIMITER ;
+
+
+-- Delete member from Members table
+DROP PROCEDURE IF EXISTS sp_delete_member;
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_member(IN p_memberID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Member not deleted.' AS Result;
+    END;
+
+    START TRANSACTION;
+    DELETE FROM `Members` WHERE `memberID` = p_memberID;
+    COMMIT;
+
+    SELECT 'Member deleted' AS Result;
+END //
+DELIMITER ;
+
+
+-- Delete credit card from CreditCards table
+DROP PROCEDURE IF EXISTS sp_delete_creditcard;
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_creditcard(IN p_creditcardID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Credit card not deleted.' AS Result;
+    END;
+
+    START TRANSACTION;
+    DELETE FROM `CreditCards` WHERE `creditCardID` = p_creditcardID;
+    COMMIT;
+
+    SELECT 'Credit card deleted' AS Result;
+END //
+DELIMITER ;
+
+
+-- Delete order from Orders table
+DROP PROCEDURE IF EXISTS sp_delete_order;
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_order(IN p_orderID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Order not deleted.' AS Result;
+    END;
+
+    START TRANSACTION;
+    DELETE FROM `Orders` WHERE `orderID` = p_orderID;
+    COMMIT;
+
+    SELECT 'Order deleted' AS Result;
+END //
+DELIMITER ;
+
+
+-- Delete wine order from WinesOrders table
+DROP PROCEDURE IF EXISTS sp_delete_wineorder;
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_wineorder(IN p_wineorderID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Wine order not deleted.' AS Result;
+    END;
+
+    START TRANSACTION;
+    DELETE FROM `WinesOrders` WHERE `wineorderID` = p_wineorderID;
+    COMMIT;
+
+    SELECT 'Wine order deleted' AS Result;
+END //
+DELIMITER ;
+
+
+-- Delete shipment from Shipments table
+DROP PROCEDURE IF EXISTS sp_delete_shipment;
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_shipment(IN p_shipmentID INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Shipment not deleted.' AS Result;
+    END;
+
+    START TRANSACTION;
+    DELETE FROM `Shipments` WHERE `shipmentID` = p_shipmentID;
+    COMMIT;
+
+    SELECT 'Shipment deleted' AS Result;
 END //
 DELIMITER ;
