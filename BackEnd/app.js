@@ -1,3 +1,11 @@
+/*
+# Citation for the following code:
+# Date: 2025-11-19
+# AI-assisted: Reset database endpoint was generated with AI help (ChatGPT)
+# Based on: OSU CS 340 course materials
+# Source URL: https://canvas.oregonstate.edu/courses/2017561/assignments/10111722
+*/
+    
     const cors = require('cors');
     const express = require('express');
     const app = express();
@@ -151,7 +159,7 @@
         });
 
 
-    // RESET DATABASE
+    // Reset database
     app.post('/reset-database', async (req, res) => {
         try {
             const [rows] = await db.query("CALL ResetBeaverCellars()");

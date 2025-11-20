@@ -1,15 +1,20 @@
-// Get an instance of mysql we can use in the app
+/*
+# Citation for the following code:
+# Date: 2025-11-19
+# Based on: OSU CS 340 course materials
+# Source URL: https://canvas.oregonstate.edu/courses/2017561/assignments/10111722
+*/
+
+// MySQL connection pool for Beaver Cellars app
 const mysql = require("mysql2");
 
-// Create a 'connection pool' using the provided credentials
 const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     host: 'classmysql.engr.oregonstate.edu',
-    user: 'cs340_loefflek', // example: cs340_MyOnidIsBilboBaggins
-    password: '9440', // last 4 of your OSU ID number
-    database: 'cs340_loefflek' // should be same as user
-}).promise(); // This makes it so we can use async / await rather than callbacks
+    user: 'cs340_loefflek',       // OSU MySQL username
+    password: '9440',             // last 4 digits of OSU ID
+    database: 'cs340_loefflek'    // database name (same as user)
+}).promise(); // Enables async/await queries
 
-// Export it for use in our application
 module.exports = pool;

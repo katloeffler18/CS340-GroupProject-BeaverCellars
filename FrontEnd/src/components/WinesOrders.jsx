@@ -1,3 +1,12 @@
+/*
+# WineOrders Component
+# Date: 11/19/2025
+# Citation for use of AI Tools:
+  # Prompt: Help me implement add, edit, and delete buttons
+  # AI Source URL: https://chatgpt.com/ 
+*/
+
+
 import React, { useState, useEffect } from 'react';
 import '../App.css'
 
