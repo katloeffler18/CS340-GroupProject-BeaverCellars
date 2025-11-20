@@ -11,7 +11,7 @@ function OrderItem({ order, handleDelete, handleEdit }) {
       <td>{order.cardName}</td>
       <td>{new Date(order.orderDate).toLocaleDateString()}</td>
       <td>${order.orderPrice}</td>
-      <td>{order.hasShipped}</td>
+      <td>{order.hasShipped ? "Yes" : "No"}</td>
       <td>
         <button onClick={() => handleEdit(order)}>Edit</button>
         <button onClick={() => handleDelete(order.orderID)}>Delete</button>
