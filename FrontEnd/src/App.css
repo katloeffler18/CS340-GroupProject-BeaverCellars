@@ -108,3 +108,11 @@ input, select {
   border-radius: 4px;
   box-sizing: border-box;
 }
+
+.reset-btn {
+  background-color: #ffffff;
+  display: inline-block;
+  color: #4d4d4d;
+  border-radius: 6px;
+  margin: 2px;
+}

@@ -21,7 +21,7 @@
         }
     });
 
-    
+
     // Delete wine
     app.delete('/wines/:wineID', async (req, res) => {
         try {
@@ -32,7 +32,6 @@
             console.error("Error executing queries:", error);
             res.status(500).send("An error occurred while executing the database queries.");
         }
-        
     });
 
     
@@ -50,8 +49,15 @@
 
 
     // Delete member
-    app.delete('/members/:memberID', (req, res) => {
-        res.status(200).json({ message: 'Member deleted' });
+    app.delete('/members/:memberID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_member(${req.params.memberID})`);
+            res.status(200).json({ message: 'Member deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
         });
 
 
@@ -69,8 +75,15 @@
 
 
     // Delete credit card
-    app.delete('/creditcards/:cardID', (req, res) => {
-        res.status(200).json({ message: 'Credit Card deleted' });
+    app.delete('/creditcards/:cardID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_creditcard(${req.params.creditCardID})`);
+            res.status(200).json({ message: 'Credit card deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
         });
 
 
@@ -88,8 +101,15 @@
 
 
     // Delete order
-    app.delete('/orders/:orderID', (req, res) => {
-        res.status(200).json({ message: 'Order deleted' });
+    app.delete('/orders/:orderID', async (req, res) => {
+        try {
+            await db.query(`call sp_delete_order(${req.params.orderID})`);
+            res.status(200).json({ message: 'Order deleted' });
+
+        } catch (error) {
+            console.error("Error executing queries:", error);
+            res.status(500).send("An error occurred while executing the database queries.");
+        }
         });
 
 
