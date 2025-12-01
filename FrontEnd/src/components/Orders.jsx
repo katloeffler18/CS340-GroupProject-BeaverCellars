@@ -2,12 +2,12 @@
 # Orders Component
 # Date: 11/19/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete buttons
+  # Prompt: Help me implement add, edit, and delete buttons and fix dropdown/data binding
   # AI Source URL: https://chatgpt.com/ 
 */
 
 import React, { useState, useEffect } from 'react';
-import '../App.css'
+import '../App.css';
 
 function OrderItem({ order, handleDelete, handleEdit }) {
   return (
@@ -29,9 +29,13 @@ function OrderItem({ order, handleDelete, handleEdit }) {
 }
 
 function Orders(url) {
-  const [data, setData] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [cards, setCards] = useState([]);
+
   const [editingOrder, setEditingOrder] = useState(null);
   const [formData, setFormData] = useState({ hasShipped: "" });
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [newOrder, setNewOrder] = useState({
     memberID: "",
@@ -41,87 +45,101 @@ function Orders(url) {
     hasShipped: "",
   });
 
+  // Fetch orders, members, credit cards
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchAll = async () => {
       try {
-        const response = await fetch(url.url + ":35827/orders", {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' },
-        });
+        const [ordersRes, membersRes, cardsRes] = await Promise.all([
+          fetch(url.url + ":35827/orders"),
+          fetch(url.url + ":35827/members"),
+          fetch(url.url + ":35827/creditcards")
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const ordersData = await ordersRes.json();
+        const membersData = await membersRes.json();
+        const cardsData = await cardsRes.json();
 
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+        setOrders(ordersData);
+        setMembers(membersData);
+        setCards(cardsData);
+
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
     };
 
-    fetchOrders();
+    fetchAll();
   }, [url.url]);
 
-  // Delete handler
+  // Delete
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
 
     await fetch(url.url + `:35827/orders/${id}`, { method: "DELETE" });
-    setData(data.filter(order => order.orderID !== id));
+    setOrders((prev) => prev.filter((o) => o.orderID !== id));
   };
 
-  // Edit handler (only hasShipped)
+  // Edit shipping status
   const handleEdit = (order) => {
     setEditingOrder(order);
-    setFormData({ hasShipped: order.hasShipped });
+    setFormData({ hasShipped: order.hasShipped ? "1" : "0" });
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, hasShipped: e.target.value });
+    setFormData({ hasShipped: e.target.value });
   };
 
-  // Submit edit (only updates hasShipped)
   const handleUpdate = async () => {
     await fetch(url.url + `:35827/orders/${editingOrder.orderID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hasShipped: formData.hasShipped }),
+      body: JSON.stringify({ hasShipped: Number(formData.hasShipped) }),
     });
 
-    setData((prev) =>
-      prev.map((order) =>
-        order.orderID === editingOrder.orderID
-          ? { ...order, hasShipped: formData.hasShipped }
-          : order
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.orderID === editingOrder.orderID
+          ? { ...o, hasShipped: Number(formData.hasShipped) }
+          : o
       )
     );
     setEditingOrder(null);
   };
 
-  // Add handler (unchanged)
+  // Add
   const handleAdd = async () => {
+    const payload = {
+      memberID: newOrder.memberID,
+      cardID: newOrder.cardID,
+      orderDate: newOrder.orderDate,
+      orderPrice: newOrder.orderPrice,
+      hasShipped: Number(newOrder.hasShipped)
+    };
+
     try {
       const response = await fetch(url.url + ":35827/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newOrder),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error(`Error adding order: ${response.status}`);
+      const added = await response.json();
 
-      const addedOrder = await response.json();
-      setData((prev) => [...prev, addedOrder]);
+      // Join the returned row with names for display
+      const member = members.find(m => m.memberID == added.memberID);
+      const card = cards.find(c => c.cardID == added.cardID);
+
+      const enriched = {
+        ...added,
+        memberName: member ? member.memberName : "",
+        cardName: card ? card.cardName : ""
+      };
+
+      setOrders((prev) => [...prev, enriched]);
+
       setShowAddForm(false);
+      setNewOrder({ memberID: "", cardID: "", orderDate: "", orderPrice: "", hasShipped: "" });
 
-      setNewOrder({
-        memberID: "",
-        cardID: "",
-        orderDate: "",
-        orderPrice: "",
-        hasShipped: "",
-      });
     } catch (err) {
       console.error(err);
     }
@@ -145,7 +163,7 @@ function Orders(url) {
           </tr>
         </thead>
         <tbody>
-          {data.map((order) => (
+          {orders.map((order) => (
             <OrderItem
               key={order.orderID}
               order={order}
@@ -159,75 +177,75 @@ function Orders(url) {
       <button onClick={() => setShowAddForm(true)}>Add New Order</button>
 
       {showAddForm && (
-        <div>
-          <div>
-            <label htmlFor="memberID">Member Name: </label>
-            <select defaultValue="Member Name" id="dropdown" name="memberName" onChange={(e) => setNewOrder({ ...newOrder, memberID: e.target.value })}>
-              <option disabled>Member Name</option>
-              {data.map((order) => (<option key={order.memberID} value={order.memberID}>{order.memberName}</option>))}
-            </select>
+        <div className="form">
+          <label>Member Name:</label>
+          <select
+            value={newOrder.memberID}
+            onChange={(e) => setNewOrder({ ...newOrder, memberID: e.target.value })}
+          >
+            <option value="">Select Member</option>
+            {members.map((m) => (
+              <option key={m.memberID} value={m.memberID}>
+                {m.memberName}
+              </option>
+            ))}
+          </select>
 
-            <br></br>
-            <label htmlFor="cardID">Name on Card: </label>
-              <select defaultValue="Name on Card" id="dropdown" name="cardName" onChange={(e) => setNewOrder({ ...newOrder, cardID: e.target.value })}>
-                <option disabled>Name on Card</option>
-                {data.map((order) => (<option key={order.cardID} value={order.cardID}>{order.cardName}</option>))}
-            </select>
-            
-            <br></br>
-            <label htmlFor="orderDate">Order Date: </label>            
-            <input
-              name="orderDate"
-              value={newOrder.orderDate}
-              onChange={(e) => setNewOrder({ ...newOrder, orderDate: e.target.value })}
-              placeholder="Date"
-            />
-            <br></br>
-            <label htmlFor="orderPrice">Order Price: </label> 
-            <input
-              name="orderPrice"
-              value={newOrder.orderPrice}
-              onChange={(e) => setNewOrder({ ...newOrder, orderPrice: e.target.value })}
-              placeholder="Price"
-            />
-            <br></br>
-            <label htmlFor="hasShipped">Shipping Status: </label> 
-            <select
-              name="hasShipped"
-              value={newOrder.hasShipped}
-              onChange={(e) => setNewOrder({ ...newOrder, hasShipped: e.target.value })}
-            >
-              <option value="">Select Shipped Status</option>
-              <option value="TRUE">True</option>
-              <option value="FALSE">False</option>
-            </select>
-            <br></br>
-            <div style={{ marginTop: "0.5rem" }}>
-              <button onClick={handleAdd}>Save</button>
-              <button onClick={() => setShowAddForm(false)}>Cancel</button>
-            </div>
-          </div>
+          <label>Card Name:</label>
+          <select
+            value={newOrder.cardID}
+            onChange={(e) => setNewOrder({ ...newOrder, cardID: e.target.value })}
+          >
+            <option value="">Select Card</option>
+            {cards.map((c) => (
+              <option key={c.cardID} value={c.cardID}>
+                {c.cardName}
+              </option>
+            ))}
+          </select>
+
+          <label>Order Date:</label>
+          <input
+            type="date"
+            value={newOrder.orderDate}
+            onChange={(e) => setNewOrder({ ...newOrder, orderDate: e.target.value })}
+          />
+
+          <label>Order Price:</label>
+          <input
+            type="number"
+            value={newOrder.orderPrice}
+            onChange={(e) => setNewOrder({ ...newOrder, orderPrice: e.target.value })}
+          />
+
+          <label>Shipped:</label>
+          <select
+            value={newOrder.hasShipped}
+            onChange={(e) => setNewOrder({ ...newOrder, hasShipped: e.target.value })}
+          >
+            <option value="">Select</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+
+          <button onClick={handleAdd}>Save</button>
+          <button onClick={() => setShowAddForm(false)}>Cancel</button>
         </div>
       )}
 
       {editingOrder && (
-        <div>
+        <div className="form">
           <h3>Edit Order Shipping Status: {editingOrder.orderID}</h3>
-           <label htmlFor="hasShipped">Shipped: </label>
-          <select
-            name="hasShipped"
-            value={formData.hasShipped}
-            onChange={handleChange}
-          >
-            <option value="">Select Shipped Status</option>
-              <option value="TRUE">True</option>
-              <option value="FALSE">False</option>
+
+          <label>Shipped:</label>
+          <select value={formData.hasShipped} onChange={handleChange}>
+            <option value="">Select</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
           </select>
-          <br></br>
-          <div style={{ marginTop: "0.5rem" }}>
-            <button onClick={handleUpdate}>Save</button>
-            <button onClick={() => setEditingOrder(null)}>Cancel</button>
-          </div>
+
+          <button onClick={handleUpdate}>Save</button>
+          <button onClick={() => setEditingOrder(null)}>Cancel</button>
         </div>
       )}
     </>

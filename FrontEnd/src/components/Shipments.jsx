@@ -1,11 +1,10 @@
 /*
-# Shipments Component
-# Date: 11/19/2025
+# Shipments Component (Updated)
+# Date: 11/30/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete buttons
+  # Prompt: Fix add/delete, order dropdown, and date formatting
   # AI Source URL: https://chatgpt.com/ 
 */
-
 
 import React, { useState, useEffect } from 'react';
 import '../App.css'
@@ -28,6 +27,7 @@ function ShipmentItem({ shipment, handleDelete }) {
 
 function Shipments(url) {
   const [data, setData] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newShipment, setNewShipment] = useState({
     orderID: "",
@@ -36,35 +36,33 @@ function Shipments(url) {
     trackingNumber: "",
   });
 
+  // Fetch shipments and orders for dropdown
   useEffect(() => {
-    const fetchShipments = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(url.url + ":35827/shipments", {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
+        const [shipRes, ordersRes] = await Promise.all([
+          fetch(url.url + ":35827/shipments"),
+          fetch(url.url + ":35827/orders")
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const shipments = await shipRes.json();
+        const ordersData = await ordersRes.json();
 
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+        setData(shipments);
+        setOrders(ordersData);
+      } catch (err) {
+        console.error("Error fetching data:", err);
       }
     };
 
-    fetchShipments();
+    fetchData();
   }, [url.url]);
 
-  // Delete handler
+  // Delete shipment
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure you want to delete this shipment?")) return;
     await fetch(url.url + `:35827/shipments/${id}`, { method: "DELETE" });
-    setData(data.filter(shipment => shipment.shipmentID !== id));
+    setData(prev => prev.filter(shipment => shipment.shipmentID !== id));
   };
 
   // Add new shipment
@@ -73,16 +71,14 @@ function Shipments(url) {
       const response = await fetch(url.url + ":35827/shipments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newShipment),
+        body: JSON.stringify(newShipment)
       });
 
       if (!response.ok) throw new Error(`Error adding shipment: ${response.status}`);
 
       const addedShipment = await response.json();
-      setData((prev) => [...prev, addedShipment]);
+      setData(prev => [...prev, addedShipment]);
       setShowAddForm(false);
-
-      // Reset form
       setNewShipment({
         orderID: "",
         shipmentDate: "",
@@ -110,12 +106,8 @@ function Shipments(url) {
           </tr>
         </thead>
         <tbody>
-          {data.map((shipment) => (
-            <ShipmentItem
-              key={shipment.shipmentID}
-              shipment={shipment}
-              handleDelete={handleDelete}
-            />
+          {data.map(shipment => (
+            <ShipmentItem key={shipment.shipmentID} shipment={shipment} handleDelete={handleDelete} />
           ))}
         </tbody>
       </table>
@@ -123,43 +115,46 @@ function Shipments(url) {
       <button onClick={() => setShowAddForm(true)}>Add New Shipment</button>
 
       {showAddForm && (
-        <div>
+        <div className='form'>
           <h3>Add New Shipment</h3>
-          <div>
-            <label for="orderID">Order ID: </label>
-              <select defaultValue="Order ID" id="dropdown" name="orderID" onChange={(e) => setNewShipment({ ...newShipment, orderID: e.target.value })}>
-                 <option disabled>Order ID</option>
-                 {data.map((shipment) => (<option key={shipment.orderID} value={shipment.orderID}>{shipment.orderID}</option>))}
-              </select>
-            <br></br>
-            <label for="shipmentDate">Shipment Date: </label>
-            <input
-              name="shipmentDate"
-              value={newShipment.shipmentDate}
-              onChange={(e) => setNewShipment({ ...newShipment, shipmentDate: e.target.value })}
-              placeholder="Date"
-            />
-            <br></br>
-            <label for="carrier">Carrier: </label>
-            <input
-              name="carrier"
-              value={newShipment.carrier}
-              onChange={(e) => setNewShipment({ ...newShipment, carrier: e.target.value })}
-              placeholder="Carrier"
-            />
-            <br></br>
-            <label for="trackingNumber">Tracking Number: </label>
-            <input
-              name="trackingNumber"
-              value={newShipment.trackingNumber}
-              onChange={(e) => setNewShipment({ ...newShipment, trackingNumber: e.target.value })}
-              placeholder="Tracking Number"
-            />
-            <br></br>
-            <div style={{ marginTop: "0.5rem" }}>
-              <button onClick={handleAdd}>Save</button>
-              <button onClick={() => setShowAddForm(false)}>Cancel</button>
-            </div>
+
+          <label>Order:</label>
+          <select
+            value={newShipment.orderID}
+            onChange={(e) => setNewShipment({...newShipment, orderID: e.target.value})}
+          >
+            <option value="">Select Order</option>
+            {orders.map(order => (
+              <option key={order.orderID} value={order.orderID}>
+                {order.orderID} — {order.memberName}
+              </option>
+            ))}
+          </select>
+
+          <label>Shipment Date:</label>
+          <input
+            type="date"
+            value={newShipment.shipmentDate}
+            onChange={(e) => setNewShipment({...newShipment, shipmentDate: e.target.value})}
+          />
+
+          <label>Carrier:</label>
+          <input
+            value={newShipment.carrier}
+            onChange={(e) => setNewShipment({...newShipment, carrier: e.target.value})}
+            placeholder="Carrier"
+          />
+
+          <label>Tracking Number:</label>
+          <input
+            value={newShipment.trackingNumber}
+            onChange={(e) => setNewShipment({...newShipment, trackingNumber: e.target.value})}
+            placeholder="Tracking Number"
+          />
+
+          <div style={{ marginTop: "0.5rem" }}>
+            <button onClick={handleAdd}>Save</button>
+            <button onClick={() => setShowAddForm(false)}>Cancel</button>
           </div>
         </div>
       )}

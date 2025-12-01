@@ -246,7 +246,6 @@
     app.put('/orders/:orderID', async (req, res) => {
         const { orderID } = req.params;
         const { memberID, cardID, orderDate, orderPrice, hasShipped } = req.body;
-
         try {
             await db.query(
                 `CALL sp_update_order(?, ?, ?, ?, ?, ?)`,
