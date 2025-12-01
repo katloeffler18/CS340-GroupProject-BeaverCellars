@@ -1,9 +1,9 @@
 /*
 # Orders Component
-# Date: 11/19/2025
+# Date: 11/30/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete buttons and fix dropdown/data binding
-  # AI Source URL: https://chatgpt.com/ 
+  # Prompt: Fix add/edit to populate names immediately and format booleans/dates
+  # AI Source URL: https://chatgpt.com/
 */
 
 import React, { useState, useEffect } from 'react';
@@ -28,14 +28,10 @@ function OrderItem({ order, handleDelete, handleEdit }) {
   );
 }
 
-function Orders(url) {
-  const [orders, setOrders] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [cards, setCards] = useState([]);
-
+function Orders({ url }) {
+  const [data, setData] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
   const [formData, setFormData] = useState({ hasShipped: "" });
-
   const [showAddForm, setShowAddForm] = useState(false);
   const [newOrder, setNewOrder] = useState({
     memberID: "",
@@ -45,101 +41,62 @@ function Orders(url) {
     hasShipped: "",
   });
 
-  // Fetch orders, members, credit cards
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [ordersRes, membersRes, cardsRes] = await Promise.all([
-          fetch(url.url + ":35827/orders"),
-          fetch(url.url + ":35827/members"),
-          fetch(url.url + ":35827/creditcards")
-        ]);
-
-        const ordersData = await ordersRes.json();
-        const membersData = await membersRes.json();
-        const cardsData = await cardsRes.json();
-
-        setOrders(ordersData);
-        setMembers(membersData);
-        setCards(cardsData);
-
-      } catch (err) {
-        console.error("Fetch error:", err);
-      }
-    };
-
-    fetchAll();
-  }, [url.url]);
-
-  // Delete
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this order?")) return;
-
-    await fetch(url.url + `:35827/orders/${id}`, { method: "DELETE" });
-    setOrders((prev) => prev.filter((o) => o.orderID !== id));
+  // Fetch orders
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${url}:35827/orders`);
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // Edit shipping status
+  useEffect(() => {
+    fetchOrders();
+  }, [url]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    await fetch(`${url}:35827/orders/${id}`, { method: "DELETE" });
+    fetchOrders();
+  };
+
   const handleEdit = (order) => {
     setEditingOrder(order);
     setFormData({ hasShipped: order.hasShipped ? "1" : "0" });
   };
 
   const handleChange = (e) => {
-    setFormData({ hasShipped: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleUpdate = async () => {
-    await fetch(url.url + `:35827/orders/${editingOrder.orderID}`, {
+    await fetch(`${url}:35827/orders/${editingOrder.orderID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hasShipped: Number(formData.hasShipped) }),
+      body: JSON.stringify({ hasShipped: formData.hasShipped }),
     });
-
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.orderID === editingOrder.orderID
-          ? { ...o, hasShipped: Number(formData.hasShipped) }
-          : o
-      )
-    );
     setEditingOrder(null);
+    fetchOrders();
   };
 
-  // Add
   const handleAdd = async () => {
-    const payload = {
-      memberID: newOrder.memberID,
-      cardID: newOrder.cardID,
-      orderDate: newOrder.orderDate,
-      orderPrice: newOrder.orderPrice,
-      hasShipped: Number(newOrder.hasShipped)
-    };
-
     try {
-      const response = await fetch(url.url + ":35827/orders", {
+      await fetch(`${url}:35827/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(newOrder),
       });
-
-      const added = await response.json();
-
-      // Join the returned row with names for display
-      const member = members.find(m => m.memberID == added.memberID);
-      const card = cards.find(c => c.cardID == added.cardID);
-
-      const enriched = {
-        ...added,
-        memberName: member ? member.memberName : "",
-        cardName: card ? card.cardName : ""
-      };
-
-      setOrders((prev) => [...prev, enriched]);
-
       setShowAddForm(false);
-      setNewOrder({ memberID: "", cardID: "", orderDate: "", orderPrice: "", hasShipped: "" });
-
+      setNewOrder({
+        memberID: "",
+        cardID: "",
+        orderDate: "",
+        orderPrice: "",
+        hasShipped: "",
+      });
+      fetchOrders(); // Refetch to populate memberName and cardName
     } catch (err) {
       console.error(err);
     }
@@ -163,7 +120,7 @@ function Orders(url) {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
+          {data.map((order) => (
             <OrderItem
               key={order.orderID}
               order={order}
@@ -178,47 +135,48 @@ function Orders(url) {
 
       {showAddForm && (
         <div className="form">
-          <label>Member Name:</label>
+          <h3>Add New Order</h3>
+          <label>Member: </label>
           <select
             value={newOrder.memberID}
             onChange={(e) => setNewOrder({ ...newOrder, memberID: e.target.value })}
           >
             <option value="">Select Member</option>
-            {members.map((m) => (
-              <option key={m.memberID} value={m.memberID}>
-                {m.memberName}
+            {data.map((order) => (
+              <option key={order.memberID} value={order.memberID}>
+                {order.memberName}
               </option>
             ))}
           </select>
-
-          <label>Card Name:</label>
+          <br />
+          <label>Card: </label>
           <select
             value={newOrder.cardID}
             onChange={(e) => setNewOrder({ ...newOrder, cardID: e.target.value })}
           >
             <option value="">Select Card</option>
-            {cards.map((c) => (
-              <option key={c.cardID} value={c.cardID}>
-                {c.cardName}
+            {data.map((order) => (
+              <option key={order.cardID} value={order.cardID}>
+                {order.cardName}
               </option>
             ))}
           </select>
-
-          <label>Order Date:</label>
+          <br />
+          <label>Order Date: </label>
           <input
             type="date"
             value={newOrder.orderDate}
             onChange={(e) => setNewOrder({ ...newOrder, orderDate: e.target.value })}
           />
-
-          <label>Order Price:</label>
+          <br />
+          <label>Order Price: </label>
           <input
             type="number"
             value={newOrder.orderPrice}
             onChange={(e) => setNewOrder({ ...newOrder, orderPrice: e.target.value })}
           />
-
-          <label>Shipped:</label>
+          <br />
+          <label>Shipped: </label>
           <select
             value={newOrder.hasShipped}
             onChange={(e) => setNewOrder({ ...newOrder, hasShipped: e.target.value })}
@@ -227,7 +185,7 @@ function Orders(url) {
             <option value="1">Yes</option>
             <option value="0">No</option>
           </select>
-
+          <br />
           <button onClick={handleAdd}>Save</button>
           <button onClick={() => setShowAddForm(false)}>Cancel</button>
         </div>
@@ -235,15 +193,18 @@ function Orders(url) {
 
       {editingOrder && (
         <div className="form">
-          <h3>Edit Order Shipping Status: {editingOrder.orderID}</h3>
-
-          <label>Shipped:</label>
-          <select value={formData.hasShipped} onChange={handleChange}>
+          <h3>Edit Shipping Status: {editingOrder.orderID}</h3>
+          <label>Shipped: </label>
+          <select
+            name="hasShipped"
+            value={formData.hasShipped}
+            onChange={handleChange}
+          >
             <option value="">Select</option>
             <option value="1">Yes</option>
             <option value="0">No</option>
           </select>
-
+          <br />
           <button onClick={handleUpdate}>Save</button>
           <button onClick={() => setEditingOrder(null)}>Cancel</button>
         </div>
