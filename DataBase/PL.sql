@@ -304,6 +304,157 @@ END //
 
 DELIMITER ;
 
+-- Insert a new member into Members
+DROP PROCEDURE IF EXISTS sp_insert_member;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_member(
+    IN p_memberName VARCHAR(100),
+    IN p_email VARCHAR(100),
+    IN p_address VARCHAR(255),
+    IN p_city VARCHAR(100),
+    IN p_state VARCHAR(50),
+    IN p_memberZipCode VARCHAR(20),
+    IN p_phoneNumber VARCHAR(20)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Member not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Members (memberName, email, address, city, state, memberZipCode, phoneNumber)
+    VALUES (p_memberName, p_email, p_address, p_city, p_state, p_memberZipCode, p_phoneNumber);
+
+    COMMIT;
+
+    SELECT 'Member inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Insert a new card into CreditCards
+DROP PROCEDURE IF EXISTS sp_insert_card;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_card(
+    IN p_memberID INT,
+    IN p_cardName VARCHAR(100),
+    IN p_cardNumber VARCHAR(50),
+    IN p_cardExpirationDate DATE,
+    IN p_billingZipCode VARCHAR(20)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Card not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO CreditCards (memberID, cardName, cardNumber, cardExpirationDate, billingZipCode)
+    VALUES (p_memberID, p_cardName, p_cardNumber, p_cardExpirationDate, p_billingZipCode);
+
+    COMMIT;
+
+    SELECT 'Card inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Insert a new order into Orders
+DROP PROCEDURE IF EXISTS sp_insert_order;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_order(
+    IN p_memberID INT,
+    IN p_cardID INT,
+    IN p_orderDate DATE,
+    IN p_orderPrice DECIMAL(10,2),
+    IN p_hasShipped TINYINT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Order not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Orders (memberID, cardID, orderDate, orderPrice, hasShipped)
+    VALUES (p_memberID, p_cardID, p_orderDate, p_orderPrice, p_hasShipped);
+
+    COMMIT;
+
+    SELECT 'Order inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Insert a new wine into WinesOrders
+DROP PROCEDURE IF EXISTS sp_insert_winesorder;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_winesorder(
+    IN p_orderID INT,
+    IN p_wineID INT,
+    IN p_wineQuantity INT,
+    IN p_price DECIMAL(10,2)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Wine order not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO WinesOrders (orderID, wineID, wineQuantity, price)
+    VALUES (p_orderID, p_wineID, p_wineQuantity, p_price);
+
+    COMMIT;
+
+    SELECT 'Wine order inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Add new shipment to Shipments
+DROP PROCEDURE IF EXISTS sp_insert_shipment;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_shipment(
+    IN p_orderID INT,
+    IN p_shipmentDate DATE,
+    IN p_carrier VARCHAR(100),
+    IN p_trackingNumber VARCHAR(100)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Shipment not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Shipments (orderID, shipmentDate, carrier, trackingNumber)
+    VALUES (p_orderID, p_shipmentDate, p_carrier, p_trackingNumber);
+
+    COMMIT;
+
+    SELECT 'Shipment inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+
 -- ===========================================
 -- Updates
 -- ===========================================
@@ -341,6 +492,150 @@ BEGIN
     COMMIT;
 
     SELECT 'Wine updated successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Update an existing member
+DROP PROCEDURE IF EXISTS sp_update_member;
+DELIMITER //
+
+CREATE PROCEDURE sp_update_member(
+    IN p_memberID INT,
+    IN p_memberName VARCHAR(100),
+    IN p_email VARCHAR(100),
+    IN p_address VARCHAR(255),
+    IN p_city VARCHAR(100),
+    IN p_state VARCHAR(50),
+    IN p_memberZipCode VARCHAR(20),
+    IN p_phoneNumber VARCHAR(20)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Member not updated.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Members
+    SET
+        memberName = p_memberName,
+        email = p_email,
+        address = p_address,
+        city = p_city,
+        state = p_state,
+        memberZipCode = p_memberZipCode,
+        phoneNumber = p_phoneNumber
+    WHERE memberID = p_memberID;
+
+    COMMIT;
+
+    SELECT 'Member updated successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Update an existing Credit Card
+DROP PROCEDURE IF EXISTS sp_update_card;
+DELIMITER //
+
+CREATE PROCEDURE sp_update_card(
+    IN p_cardID INT,
+    IN p_memberID INT,
+    IN p_cardName VARCHAR(100),
+    IN p_cardNumber VARCHAR(50),
+    IN p_cardExpirationDate DATE,
+    IN p_billingZipCode VARCHAR(20)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Card not updated.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE CreditCards
+    SET
+        cardName = p_cardName,
+        cardNumber = p_cardNumber,
+        cardExpirationDate = p_cardExpirationDate,
+        billingZipCode = p_billingZipCode
+    WHERE cardID = p_cardID;
+
+    COMMIT;
+
+    SELECT 'Card updated successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Update existing order
+DROP PROCEDURE IF EXISTS sp_update_order;
+DELIMITER //
+
+CREATE PROCEDURE sp_update_order(
+    IN p_orderID INT,
+    IN p_memberID INT,
+    IN p_cardID INT,
+    IN p_orderDate DATE,
+    IN p_orderPrice DECIMAL(10,2),
+    IN p_hasShipped TINYINT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Order not updated.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Orders
+    SET
+        hasShipped = p_hasShipped
+    WHERE orderID = p_orderID;
+
+    COMMIT;
+
+    SELECT 'Order updated successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- Update wine in WinesOrders
+DROP PROCEDURE IF EXISTS sp_update_winesorder;
+DELIMITER //
+
+CREATE PROCEDURE sp_update_winesorder(
+    IN p_winesOrdersID INT,
+    IN p_orderID INT,
+    IN p_wineID INT,
+    IN p_wineQuantity INT,
+    IN p_price DECIMAL(10,2)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Wine order not updated.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE WinesOrders
+    SET
+        wineID = p_wineID,
+        wineQuantity = p_wineQuantity,
+        price = p_price
+    WHERE winesOrdersID = p_winesOrdersID;
+
+    COMMIT;
+
+    SELECT 'Wine order updated successfully' AS Result;
 END //
 
 DELIMITER ;
