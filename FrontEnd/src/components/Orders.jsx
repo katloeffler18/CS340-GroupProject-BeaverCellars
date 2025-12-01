@@ -1,11 +1,3 @@
-/*
-# Orders Component
-# Date: 11/30/2025
-# Citation for use of AI Tools:
-  # Prompt: Fix add/edit to populate names immediately and format booleans/dates
-  # AI Source URL: https://chatgpt.com/
-*/
-
 import React, { useState, useEffect } from 'react';
 import '../App.css';
 
@@ -29,7 +21,9 @@ function OrderItem({ order, handleDelete, handleEdit }) {
 }
 
 function Orders({ url }) {
-  const [data, setData] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [cards, setCards] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
   const [formData, setFormData] = useState({ hasShipped: "" });
   const [showAddForm, setShowAddForm] = useState(false);
@@ -41,25 +35,40 @@ function Orders({ url }) {
     hasShipped: "",
   });
 
-  // Fetch orders
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch(`${url}:35827/orders`);
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
     fetchOrders();
+    fetchMembers();
+    fetchCards();
   }, [url]);
 
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(`${url}:35827/orders`);
+      const result = await res.json();
+      setOrders(result);
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const res = await fetch(`${url}:35827/members`);
+      const result = await res.json();
+      setMembers(result);
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchCards = async () => {
+    try {
+      const res = await fetch(`${url}:35827/creditcards`);
+      const result = await res.json();
+      setCards(result);
+    } catch (err) { console.error(err); }
+  };
+
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    if (!window.confirm("Delete this order?")) return;
     await fetch(`${url}:35827/orders/${id}`, { method: "DELETE" });
-    fetchOrders();
+    setOrders(prev => prev.filter(o => o.orderID !== id));
   };
 
   const handleEdit = (order) => {
@@ -67,9 +76,7 @@ function Orders({ url }) {
     setFormData({ hasShipped: order.hasShipped ? "1" : "0" });
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleUpdate = async () => {
     await fetch(`${url}:35827/orders/${editingOrder.orderID}`, {
@@ -83,23 +90,23 @@ function Orders({ url }) {
 
   const handleAdd = async () => {
     try {
-      await fetch(`${url}:35827/orders`, {
+      const response = await fetch(`${url}:35827/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newOrder),
       });
+      const addedOrder = await response.json();
+
+      // Immediately merge memberName and cardName
+      const member = members.find(m => m.memberID === addedOrder.memberID);
+      const card = cards.find(c => c.cardID === addedOrder.cardID);
+      addedOrder.memberName = member?.memberName || "";
+      addedOrder.cardName = card?.cardName || "";
+
+      setOrders(prev => [...prev, addedOrder]);
       setShowAddForm(false);
-      setNewOrder({
-        memberID: "",
-        cardID: "",
-        orderDate: "",
-        orderPrice: "",
-        hasShipped: "",
-      });
-      fetchOrders(); // Refetch to populate memberName and cardName
-    } catch (err) {
-      console.error(err);
-    }
+      setNewOrder({ memberID: "", cardID: "", orderDate: "", orderPrice: "", hasShipped: "" });
+    } catch (err) { console.error(err); }
   };
 
   return (
@@ -112,75 +119,46 @@ function Orders({ url }) {
             <th>Member ID</th>
             <th>Member Name</th>
             <th>Card ID</th>
-            <th>Name on Card</th>
+            <th>Card Name</th>
             <th>Order Date</th>
-            <th>Order Price</th>
+            <th>Price</th>
             <th>Shipped</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((order) => (
-            <OrderItem
-              key={order.orderID}
-              order={order}
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-            />
+          {orders.map(order => (
+            <OrderItem key={order.orderID} order={order} handleDelete={handleDelete} handleEdit={handleEdit} />
           ))}
         </tbody>
       </table>
 
-      <button onClick={() => setShowAddForm(true)}>Add New Order</button>
+      <button onClick={() => setShowAddForm(true)}>Add Order</button>
 
       {showAddForm && (
         <div className="form">
-          <h3>Add New Order</h3>
           <label>Member: </label>
-          <select
-            value={newOrder.memberID}
-            onChange={(e) => setNewOrder({ ...newOrder, memberID: e.target.value })}
-          >
+          <select value={newOrder.memberID} onChange={e => setNewOrder({ ...newOrder, memberID: e.target.value })}>
             <option value="">Select Member</option>
-            {data.map((order) => (
-              <option key={order.memberID} value={order.memberID}>
-                {order.memberName}
-              </option>
-            ))}
+            {members.map(m => <option key={m.memberID} value={m.memberID}>{m.memberName}</option>)}
           </select>
           <br />
           <label>Card: </label>
-          <select
-            value={newOrder.cardID}
-            onChange={(e) => setNewOrder({ ...newOrder, cardID: e.target.value })}
-          >
+          <select value={newOrder.cardID} onChange={e => setNewOrder({ ...newOrder, cardID: e.target.value })}>
             <option value="">Select Card</option>
-            {data.map((order) => (
-              <option key={order.cardID} value={order.cardID}>
-                {order.cardName}
-              </option>
+            {cards.filter(c => c.memberID === newOrder.memberID).map(c => (
+              <option key={c.cardID} value={c.cardID}>{c.cardName}</option>
             ))}
           </select>
           <br />
           <label>Order Date: </label>
-          <input
-            type="date"
-            value={newOrder.orderDate}
-            onChange={(e) => setNewOrder({ ...newOrder, orderDate: e.target.value })}
-          />
+          <input type="date" value={newOrder.orderDate} onChange={e => setNewOrder({ ...newOrder, orderDate: e.target.value })} />
           <br />
-          <label>Order Price: </label>
-          <input
-            type="number"
-            value={newOrder.orderPrice}
-            onChange={(e) => setNewOrder({ ...newOrder, orderPrice: e.target.value })}
-          />
+          <label>Price: </label>
+          <input type="number" value={newOrder.orderPrice} onChange={e => setNewOrder({ ...newOrder, orderPrice: e.target.value })} />
           <br />
           <label>Shipped: </label>
-          <select
-            value={newOrder.hasShipped}
-            onChange={(e) => setNewOrder({ ...newOrder, hasShipped: e.target.value })}
-          >
+          <select value={newOrder.hasShipped} onChange={e => setNewOrder({ ...newOrder, hasShipped: e.target.value })}>
             <option value="">Select</option>
             <option value="1">Yes</option>
             <option value="0">No</option>
@@ -193,13 +171,8 @@ function Orders({ url }) {
 
       {editingOrder && (
         <div className="form">
-          <h3>Edit Shipping Status: {editingOrder.orderID}</h3>
           <label>Shipped: </label>
-          <select
-            name="hasShipped"
-            value={formData.hasShipped}
-            onChange={handleChange}
-          >
+          <select name="hasShipped" value={formData.hasShipped} onChange={handleChange}>
             <option value="">Select</option>
             <option value="1">Yes</option>
             <option value="0">No</option>

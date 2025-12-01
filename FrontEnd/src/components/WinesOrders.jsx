@@ -2,7 +2,7 @@
 # WinesOrders Component
 # Date: 11/30/2025
 # Citation for use of AI Tools:
-  # Prompt: Fix add/edit to populate names immediately
+  # Prompt: Help me implement add, edit, and delete buttons
   # AI Source URL: https://chatgpt.com/
 */
 
@@ -27,60 +27,128 @@ function WineOrderItem({ wineOrder, handleDelete, handleEdit }) {
   );
 }
 
-function WinesOrders({ url }) {
-  const [data, setData] = useState([]);
+function WinesOrders(url) {
+  const [data, setData] = useState([]); // WinesOrders table
+  const [orders, setOrders] = useState([]); // Orders table
+  const [wines, setWines] = useState([]); // Wines table
   const [editingWine, setEditingWine] = useState(null);
-  const [formData, setFormData] = useState({ wineID: "", wineQuantity: "", price: "" });
+
+  const [formData, setFormData] = useState({
+    orderID: "",
+    wineID: "",
+    wineQuantity: "",
+    price: "",
+  });
+
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newWine, setNewWine] = useState({ orderID: "", wineID: "", wineQuantity: "", price: "" });
+  const [newWine, setNewWine] = useState({
+    orderID: "",
+    wineID: "",
+    wineQuantity: "",
+    price: "",
+  });
 
-  const fetchWinesOrders = async () => {
-    try {
-      const response = await fetch(`${url}:35827/winesorders`);
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // Fetch all data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [woRes, ordersRes, winesRes] = await Promise.all([
+          fetch(url.url + ":35827/winesorders"),
+          fetch(url.url + ":35827/orders"),
+          fetch(url.url + ":35827/wines"),
+        ]);
 
-  useEffect(() => { fetchWinesOrders(); }, [url]);
+        const [woData, ordersData, winesData] = await Promise.all([
+          woRes.json(),
+          ordersRes.json(),
+          winesRes.json(),
+        ]);
 
+        setData(woData);
+        setOrders(ordersData);
+        setWines(winesData);
+      } catch (err) {
+        console.error("Error loading data:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Delete handler
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this wine order?")) return;
-    await fetch(`${url}:35827/winesorders/${id}`, { method: "DELETE" });
-    fetchWinesOrders();
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+    await fetch(url.url + `:35827/winesorders/${id}`, { method: "DELETE" });
+    setData(data.filter(wo => wo.winesOrdersID !== id));
   };
 
+  // Edit handler
   const handleEdit = (wineOrder) => {
     setEditingWine(wineOrder);
-    setFormData({ wineID: wineOrder.wineID, wineQuantity: wineOrder.wineQuantity, price: wineOrder.price });
+    setFormData({
+      orderID: wineOrder.orderID,
+      wineID: wineOrder.wineID,
+      wineQuantity: wineOrder.wineQuantity,
+      price: wineOrder.price,
+    });
   };
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
+  // Submit update
   const handleUpdate = async () => {
-    await fetch(`${url}:35827/winesorders/${editingWine.winesOrdersID}`, {
+    await fetch(url.url + `:35827/winesorders/${editingWine.winesOrdersID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
+
+    const selectedOrder = orders.find(o => o.orderID === Number(formData.orderID));
+    const selectedWine = wines.find(w => w.wineID === Number(formData.wineID));
+
+    setData(prev =>
+      prev.map(wo =>
+        wo.winesOrdersID === editingWine.winesOrdersID
+          ? {
+              ...wo,
+              ...formData,
+              memberName: selectedOrder ? selectedOrder.memberName : "",
+              wineName: selectedWine ? selectedWine.wineName : "",
+            }
+          : wo
+      )
+    );
+
     setEditingWine(null);
-    fetchWinesOrders();
   };
 
+  // Add new wine order
   const handleAdd = async () => {
     try {
-      await fetch(`${url}:35827/winesorders`, {
+      const response = await fetch(url.url + ":35827/winesorders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newWine),
       });
+
+      const added = await response.json();
+
+      const selectedOrder = orders.find(o => o.orderID === Number(newWine.orderID));
+      const selectedWine = wines.find(w => w.wineID === Number(newWine.wineID));
+
+      added.memberName = selectedOrder ? selectedOrder.memberName : "";
+      added.wineName = selectedWine ? selectedWine.wineName : "";
+
+      setData(prev => [...prev, added]);
       setShowAddForm(false);
+
       setNewWine({ orderID: "", wineID: "", wineQuantity: "", price: "" });
-      fetchWinesOrders(); // Refetch to populate member/wine names
     } catch (err) {
-      console.error(err);
+      console.error("Add failed:", err);
     }
   };
 
@@ -101,10 +169,10 @@ function WinesOrders({ url }) {
           </tr>
         </thead>
         <tbody>
-          {data.map((wineOrder) => (
+          {data.map(wo => (
             <WineOrderItem
-              key={wineOrder.winesOrdersID}
-              wineOrder={wineOrder}
+              key={wo.winesOrdersID}
+              wineOrder={wo}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
             />
@@ -116,28 +184,46 @@ function WinesOrders({ url }) {
 
       {showAddForm && (
         <div className="form">
-          <h3>Add Wine to Order</h3>
-          <label>Order: </label>
-          <select value={newWine.orderID} onChange={(e) => setNewWine({ ...newWine, orderID: e.target.value })}>
+          <label>Order:</label>
+          <select
+            value={newWine.orderID}
+            onChange={(e) => setNewWine({ ...newWine, orderID: e.target.value })}
+          >
             <option value="">Select Order</option>
-            {data.map((wo) => (
-              <option key={wo.orderID} value={wo.orderID}>{wo.memberName} (Order #{wo.orderID})</option>
+            {orders.map(o => (
+              <option key={o.orderID} value={o.orderID}>
+                {o.orderID} - {o.memberName}
+              </option>
             ))}
           </select>
-          <br />
-          <label>Wine: </label>
-          <select value={newWine.wineID} onChange={(e) => setNewWine({ ...newWine, wineID: e.target.value })}>
+
+          <label>Wine:</label>
+          <select
+            value={newWine.wineID}
+            onChange={(e) => setNewWine({ ...newWine, wineID: e.target.value })}
+          >
             <option value="">Select Wine</option>
-            {data.map((wo) => (
-              <option key={wo.wineID} value={wo.wineID}>{wo.wineName}</option>
+            {wines.map(w => (
+              <option key={w.wineID} value={w.wineID}>
+                {w.wineName}
+              </option>
             ))}
           </select>
-          <br />
-          <label>Quantity: </label>
-          <input type="number" value={newWine.wineQuantity} onChange={(e) => setNewWine({ ...newWine, wineQuantity: e.target.value })} />
-          <br />
-          <label>Price: </label>
-          <input type="number" value={newWine.price} onChange={(e) => setNewWine({ ...newWine, price: e.target.value })} />
+
+          <label>Quantity:</label>
+          <input
+            name="wineQuantity"
+            value={newWine.wineQuantity}
+            onChange={(e) => setNewWine({ ...newWine, wineQuantity: e.target.value })}
+          />
+
+          <label>Price:</label>
+          <input
+            name="price"
+            value={newWine.price}
+            onChange={(e) => setNewWine({ ...newWine, price: e.target.value })}
+          />
+
           <br />
           <button onClick={handleAdd}>Save</button>
           <button onClick={() => setShowAddForm(false)}>Cancel</button>
@@ -147,19 +233,31 @@ function WinesOrders({ url }) {
       {editingWine && (
         <div className="form">
           <h3>Edit Wine in Order: {editingWine.winesOrdersID}</h3>
-          <label>Wine: </label>
-          <select name="wineID" value={formData.wineID} onChange={handleChange}>
-            <option value="">Select Wine</option>
-            {data.map((wo) => (
-              <option key={wo.wineID} value={wo.wineID}>{wo.wineName}</option>
+
+          <label>Order:</label>
+          <select name="orderID" value={formData.orderID} onChange={handleChange}>
+            {orders.map(o => (
+              <option key={o.orderID} value={o.orderID}>
+                {o.orderID} - {o.memberName}
+              </option>
             ))}
           </select>
-          <br />
-          <label>Quantity: </label>
-          <input type="number" name="wineQuantity" value={formData.wineQuantity} onChange={handleChange} />
-          <br />
-          <label>Price: </label>
-          <input type="number" name="price" value={formData.price} onChange={handleChange} />
+
+          <label>Wine:</label>
+          <select name="wineID" value={formData.wineID} onChange={handleChange}>
+            {wines.map(w => (
+              <option key={w.wineID} value={w.wineID}>
+                {w.wineName}
+              </option>
+            ))}
+          </select>
+
+          <label>Quantity:</label>
+          <input name="wineQuantity" value={formData.wineQuantity} onChange={handleChange} />
+
+          <label>Price:</label>
+          <input name="price" value={formData.price} onChange={handleChange} />
+
           <br />
           <button onClick={handleUpdate}>Save</button>
           <button onClick={() => setEditingWine(null)}>Cancel</button>
