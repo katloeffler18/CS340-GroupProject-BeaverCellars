@@ -2,7 +2,7 @@
 # CreditCards Component
 # Date: 11/19/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete buttons, and fix member dropdown
+  # Prompt: Help me implement add, edit, and delete functionality, and fix member dropdown
   # AI Source URL: https://chatgpt.com/
 */
 

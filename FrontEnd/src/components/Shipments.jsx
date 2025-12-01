@@ -3,6 +3,7 @@
 # Date: 11/30/2025
 # Citation for use of AI Tools:
   # Prompt: Fix Shipments add form to immediately show member name
+  # Help me implement add, edit, and delete functionality
   # AI Source URL: https://chatgpt.com/
 */
 

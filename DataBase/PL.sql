@@ -2,7 +2,8 @@
 -- Date: 2025-11-16
 -- Adapted from: SELECT and DELETE procedures are orinigal work of authors. 
 -- Source URL: N/A
--- If AI tools were used: Generated with assistance from ChatGPT using prompt "Can you turn this sql code into stored procedures?" and copying in SELECT and DELETE procedures
+-- If AI tools were used: Generated with assistance from ChatGPT using prompt "Can you turn this sql code into stored procedures?" 
+-- and copying in SELECT and DELETE procedures
 
 
 -- ===========================================
