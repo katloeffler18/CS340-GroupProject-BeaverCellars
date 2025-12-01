@@ -42,7 +42,44 @@
         }
     });
 
-    
+    // Add new Wine
+    app.post('/wines', async (req, res) => {
+        const { wineName, wineVariety, wineYear, winePrice, grapeRegion } = req.body;
+
+        try {
+            await db.query(
+                `CALL sp_insert_wine(?, ?, ?, ?, ?)`,
+                [wineName, wineVariety, wineYear, winePrice, grapeRegion]
+            );
+
+            const [result] = await db.query("SELECT * FROM Wines ORDER BY wineID DESC LIMIT 1");
+            res.status(201).json(result[0]);
+            
+        } catch (error) {
+            console.error("Error inserting wine:", error);
+            res.status(500).send("An error occurred while inserting the wine.");
+        }
+    });
+
+    // Update Wines
+    app.put('/wines/:wineID', async (req, res) => {
+        const { wineID } = req.params;
+        const { wineName, wineVariety, wineYear, winePrice, grapeRegion } = req.body;
+
+        try {
+            await db.query(
+                `CALL sp_update_wine(?, ?, ?, ?, ?, ?)`,
+                [wineID, wineName, wineVariety, wineYear, winePrice, grapeRegion]
+            );
+
+            res.status(200).json({ message: 'Wine updated' });
+            
+        } catch (error) {
+            console.error("Error updating wine:", error);
+            res.status(500).send("An error occurred while updating the wine.");
+        }
+    });
+
     // Get Members
     app.get('/members', async (req, res) => {
         try {

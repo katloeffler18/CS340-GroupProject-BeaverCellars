@@ -233,7 +233,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS sp_delete_winesorders;
 DELIMITER //
 
-CREATE PROCEDURE sp_delete_winesorder(IN p_winesOrdersID INT)
+CREATE PROCEDURE sp_delete_winesorders(IN p_winesOrdersID INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -268,4 +268,79 @@ BEGIN
 
     SELECT 'Shipment deleted' AS Result;
 END //
+DELIMITER ;
+
+-- ===========================================
+-- Inserts
+-- ===========================================
+
+-- Insert a new wine into Wines table
+DROP PROCEDURE IF EXISTS sp_insert_wine;
+DELIMITER //
+
+CREATE PROCEDURE sp_insert_wine(
+    IN p_wineName VARCHAR(100),
+    IN p_wineVariety VARCHAR(50),
+    IN p_wineYear INT,
+    IN p_winePrice DECIMAL(6,2),
+    IN p_grapeRegion VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Wine not inserted.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Wines (wineName, wineVariety, wineYear, winePrice, grapeRegion)
+    VALUES (p_wineName, p_wineVariety, p_wineYear, p_winePrice, p_grapeRegion);
+
+    COMMIT;
+
+    SELECT 'Wine inserted successfully' AS Result;
+END //
+
+DELIMITER ;
+
+-- ===========================================
+-- Updates
+-- ===========================================
+
+-- Update an existing wine
+DROP PROCEDURE IF EXISTS sp_update_wine;
+DELIMITER //
+
+CREATE PROCEDURE sp_update_wine(
+    IN p_wineID INT,
+    IN p_wineName VARCHAR(100),
+    IN p_wineVariety VARCHAR(50),
+    IN p_wineYear INT,
+    IN p_winePrice DECIMAL(6,2),
+    IN p_grapeRegion VARCHAR(50)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error! Wine not updated.' AS Result;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Wines
+    SET 
+        wineName = p_wineName,
+        wineVariety = p_wineVariety,
+        wineYear = p_wineYear,
+        winePrice = p_winePrice,
+        grapeRegion = p_grapeRegion
+    WHERE wineID = p_wineID;
+
+    COMMIT;
+
+    SELECT 'Wine updated successfully' AS Result;
+END //
+
 DELIMITER ;
