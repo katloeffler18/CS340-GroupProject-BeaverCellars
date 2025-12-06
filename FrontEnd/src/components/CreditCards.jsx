@@ -94,8 +94,9 @@ function CreditCards(url) {
     }
 
     // Expiration date
-    if (!card.cardExpirationDate) {
-      errors.cardExpirationDate = "Expiration date is required.";
+    const today = new Date();
+    if (!card.cardExpirationDate || exp <= today) {
+      errors.cardExpirationDate = "Expiration date must be a future date.";
     }
 
     // ZIP code

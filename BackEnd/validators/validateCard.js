@@ -1,11 +1,7 @@
 // validators/validateCard.js
 
 module.exports = function validateCard(req, res, next) {
-    const { memberID, cardName, cardNumber, cardExpirationDate, billingZipCode } = req.body;
-
-    if (!Number.isInteger(memberID)) {
-        return res.status(400).json({ error: "Member ID must be an integer." });
-    }
+    const {cardName, cardNumber, cardExpirationDate, billingZipCode } = req.body;
 
     if (!cardName || cardName.trim() === "") {
         return res.json(400).json({ error: "Card name is required." });
