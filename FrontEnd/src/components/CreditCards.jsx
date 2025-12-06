@@ -95,7 +95,7 @@ function CreditCards(url) {
 
     // Expiration date
     const today = new Date();
-    const exp = new Date(cardExpirationDate);
+    const exp = new Date(card.cardExpirationDate);
     if (!card.cardExpirationDate || exp <= today) {
       errors.cardExpirationDate = "Expiration date must be a future date.";
     }
