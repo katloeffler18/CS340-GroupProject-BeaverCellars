@@ -81,13 +81,11 @@ function Wines(url) {
     if (!wine.wineName.trim()) errors.wineName = "Name is required.";
     if (!wine.wineVariety.trim()) errors.wineVariety = "Variety is required.";
 
-    const year = parseInt(wine.wineYear, 10);
-    if (isNaN(year) || year < 1900 || year > new Date().getFullYear() + 1) {
+    if (isNaN(wine.wineYear) || wine.wineYear < 1900 || wine.wineYear > new Date().getFullYear() + 1) {
       errors.wineYear = "Year must be a valid number between 1900 and next year.";
     }
 
-    const price = parseFloat(wine.winePrice);
-    if (isNaN(price) || price <= 0) {
+    if (isNaN(wine.winePrice) || wine.winePrice <= 0) {
       errors.winePrice = "Price must be a positive number.";
     }
 
@@ -160,7 +158,15 @@ function Wines(url) {
 
 
   const handleAdd = async () => {
-    const validationErrors = validateWineForm(newWine);
+    const payload = {
+      wineName: newWine.wineName,
+      wineVariety: newWine.wineVariety,
+      wineYear: parseInt(newWine.wineYear, 10),
+      winePrice: parseFloat(newWine.winePrice),
+      grapeRegion: newWine.grapeRegion,
+    };
+
+    const validationErrors = validateWineForm(payload);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -172,7 +178,7 @@ function Wines(url) {
       const response = await fetch(url.url + ":35827/wines", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newWine),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
