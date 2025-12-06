@@ -249,7 +249,6 @@
     });
 
     
-
     // Update Order
     app.put('/orders/:orderID', validateOrder, async (req, res) => {
         const { orderID } = req.params;
@@ -268,7 +267,6 @@
             res.status(500).send("An error occurred while updating the order.");
         }
     });
-
 
 
     // Delete order
@@ -320,7 +318,6 @@
     });
 
 
-
     // Update Wine Order
     app.put('/winesorders/:winesOrdersID', validateWinesOrder, async (req, res) => {
         const { winesOrdersID } = req.params;
@@ -345,11 +342,16 @@
     });
 
 
-
     // Delete wine order
     app.delete('/winesorders/:winesOrdersID', async (req, res) => {
         try {
             await db.query(`CALL sp_delete_winesorders(${req.params.winesOrdersID})`);
+            
+            await db.query(
+                `CALL sp_recalculate_order_total(?)`,
+                [req.body.orderID]
+            );
+
             res.status(200).json({ message: 'Wine order deleted' });
 
         } catch (error) {

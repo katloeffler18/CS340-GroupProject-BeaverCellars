@@ -80,8 +80,15 @@ function WinesOrders(url) {
   // Delete handler
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
-
-    await fetch(url.url + `:35827/winesorders/${id}`, { method: "DELETE" });
+    const orderID = setData.filter(wo => wo.winesOrdersID === id).orderID;
+    const payload = {
+      orderID: Number(orderID),
+    };
+    await fetch(url.url + `:35827/winesorders/${id}`, { 
+      method: "DELETE", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload), 
+    });
     setData(data.filter(wo => wo.winesOrdersID !== id));
   };
 
