@@ -85,7 +85,7 @@ INSERT INTO CreditCards (memberID, cardName, cardNumber, cardExpirationDate, bil
 VALUES (@memberIDInput, @cardNameInput, @cardNumberInput, @cardExpirationDateInput, @billingZipCodeInput);
 
 -- Insert new order 
--- NOTE: orderPrice is NOT inserted manually (auto-calculated based on WinesOrders)
+-- NOTE: orderPrice is NOT inserted manually. It defaults to 0 then is auto-calculated based on add/update to WinesOrders.
 INSERT INTO Orders (memberID, cardID, orderDate, orderPrice, hasShipped)
 VALUES (@memberIDInput, @cardIDInput, @orderDateInput, 0, @hasShippedInput);
 
@@ -94,7 +94,7 @@ INSERT INTO Shipments (orderID, shipmentDate, carrier, trackingNumber)
 VALUES (@orderIDInput, @shipmentDateInput, @carrierInput, @trackingInput);
 
 -- Insert new wine into an order
--- NOTE: price is NOT manually inserted (auto-calculated)
+-- NOTE: price is NOT manually inserted (auto-calculated by wine price × quantity)
 INSERT INTO WinesOrders (orderID, wineID, wineQuantity, price)
 VALUES (@orderIDInput, @wineIDInput, @wineQuantityInput);
 
@@ -135,7 +135,7 @@ SET hasShipped = @newHasShippedInput
 WHERE orderID = @orderIDInput;
 
 -- Update wine in an order
--- NOTE: price automatically recalculated
+-- NOTE: price automatically recalculated by wine price × quantity
 UPDATE WinesOrders
 SET wineID = @newWineIDInput,
     wineQuantity = @newWineQuantityInput
