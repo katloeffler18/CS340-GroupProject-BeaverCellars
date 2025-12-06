@@ -129,12 +129,10 @@ function WinesOrders(url) {
     }
 
     const payload = {
-      orderID: Number(newWine.orderID),
-      wineID: Number(newWine.wineID),
-      wineQuantity: Number(newWine.wineQuantity),
+      orderID: Number(formData.orderID),
+      wineID: Number(formData.wineID),
+      wineQuantity: Number(formData.wineQuantity),
     };
-
-    console.log(payload);
     
     await fetch(url.url + `:35827/winesorders/${editingWine.winesOrdersID}`, {
       method: "PUT",
