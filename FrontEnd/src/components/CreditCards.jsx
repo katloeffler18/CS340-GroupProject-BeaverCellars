@@ -2,14 +2,14 @@
 # CreditCards Component
 # Date: 11/19/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete functionality, and fix member dropdown
+  # Prompt: Help me implement add, edit, and delete functionality, validation, and member dropdown
   # AI Source URL: https://chatgpt.com/
 */
 
 import React, { useState, useEffect } from 'react';
 import '../App.css';
 
-// Table row for a single credit card
+// Single row for a credit card
 function CreditCardItem({ creditCard, handleDelete, handleEdit }) {
   return (
     <tr>
@@ -29,8 +29,10 @@ function CreditCardItem({ creditCard, handleDelete, handleEdit }) {
 }
 
 function CreditCards(url) {
-  const [data, setData] = useState([]);          // credit cards
-  const [members, setMembers] = useState([]);    // members table
+  const [data, setData] = useState([]);       // All credit cards
+  const [members, setMembers] = useState([]); // Members dropdown list
+  const [errors, setErrors] = useState({});
+
   const [editingCreditCard, setEditingCreditCard] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -50,22 +52,17 @@ function CreditCards(url) {
     billingZipCode: "",
   });
 
-  //
-  // LOAD CREDIT CARDS + MEMBERS
-  //
+  // Load members + credit cards
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // credit cards
         const ccRes = await fetch(url.url + ":35827/creditcards");
         const ccData = await ccRes.json();
         setData(ccData);
 
-        // members
-        const memberRes = await fetch(url.url + ":35827/members");
-        const memberData = await memberRes.json();
-        setMembers(memberData);
-
+        const memRes = await fetch(url.url + ":35827/members");
+        const memData = await memRes.json();
+        setMembers(memData);
       } catch (err) {
         console.error("Error loading data:", err);
       }
@@ -74,94 +71,149 @@ function CreditCards(url) {
     fetchData();
   }, []);
 
-  //
-  // DELETE CREDIT CARD
-  //
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+  // -----------------------------
+  // VALIDATION
+  // -----------------------------
+  const validateCardForm = (card) => {
+    let errors = {};
 
-    await fetch(url.url + `:35827/creditcards/${id}`, { method: "DELETE" });
-    setData(data.filter(cc => cc.cardID !== id));
+    if (!card.memberID) {
+      errors.memberID = "You must select a member.";
+    }
+
+    if (!card.cardName.trim()) {
+      errors.cardName = "Name on card is required.";
+    }
+
+    // Card Number (16 digits)
+    const digits = String(card.cardNumber).replace(/\D/g, "");
+    if (!digits) {
+      errors.cardNumber = "Card number is required.";
+    } else if (digits.length < 13 || digits.length > 16) {
+      errors.cardNumber = "Card number must be 13–16 digits.";
+    }
+
+    // Expiration date
+    if (!card.cardExpirationDate) {
+      errors.cardExpirationDate = "Expiration date is required.";
+    }
+
+    // ZIP code
+    const zip = String(card.billingZipCode).replace(/\D/g, "");
+    if (!zip) {
+      errors.billingZipCode = "Billing ZIP is required.";
+    } else if (zip.length !== 5) {
+      errors.billingZipCode = "ZIP must be 5 digits.";
+    }
+
+    return errors;
   };
 
-  //
-  // BEGIN EDIT MODE
-  //
-  const handleEdit = (creditCard) => {
-    setEditingCreditCard(creditCard);
+  // -----------------------------
+  // DELETE
+  // -----------------------------
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this card?")) return;
 
-    // Convert date to yyyy-mm-dd for <input type="date">
-    const isoDate = new Date(creditCard.cardExpirationDate)
-      .toISOString()
-      .split("T")[0];
+    await fetch(url.url + `:35827/creditcards/${id}`, { method: "DELETE" });
+
+    setData((prev) => prev.filter(card => card.cardID !== id));
+  };
+
+  // -----------------------------
+  // EDIT MODE
+  // -----------------------------
+  const handleEdit = (card) => {
+    setErrors({});
+    setEditingCreditCard(card);
+
+    const isoDate = new Date(card.cardExpirationDate).toISOString().split("T")[0];
 
     setFormData({
-      memberID: creditCard.memberID,
-      cardName: creditCard.cardName,
-      cardNumber: creditCard.cardNumber,
+      memberID: card.memberID,
+      cardName: card.cardName,
+      cardNumber: card.cardNumber,
       cardExpirationDate: isoDate,
-      billingZipCode: creditCard.billingZipCode,
+      billingZipCode: card.billingZipCode,
     });
   };
 
-  //
-  // HANDLE EDIT FORM INPUT
-  //
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //
-  // SUBMIT UPDATE
-  //
+  // -----------------------------
+  // UPDATE CARD
+  // -----------------------------
   const handleUpdate = async () => {
-    await fetch(url.url + `:35827/creditcards/${editingCreditCard.cardID}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    const validationErrors = validateCardForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-    // Get selected member's name
-    const selectedMember = members.find(m => m.memberID === Number(formData.memberID));
+    const cleanData = {
+      ...formData,
+      cardNumber: formData.cardNumber.replace(/\D/g, ""),
+      billingZipCode: formData.billingZipCode.replace(/\D/g, ""),
+    };
 
-    setData(prev =>
-      prev.map(cc =>
-        cc.cardID === editingCreditCard.cardID
-          ? {
-              ...cc,
-              ...formData,
-              memberName: selectedMember ? selectedMember.memberName : "",
-            }
-          : cc
-      )
-    );
-
-    setEditingCreditCard(null);
-  };
-
-  //
-  // ADD NEW CREDIT CARD
-  //
-  const handleAdd = async () => {
     try {
-      const response = await fetch(url.url + ":35827/creditcards", {
-        method: "POST",
+      await fetch(url.url + `:35827/creditcards/${editingCreditCard.cardID}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newCreditCard),
+        body: JSON.stringify(cleanData),
       });
 
-      const added = await response.json();
+      const member = members.find(m => m.memberID === Number(cleanData.memberID));
 
-      // Attach member name
-      const selectedMember = members.find(
-        m => m.memberID === Number(newCreditCard.memberID)
+      setData((prev) =>
+        prev.map((card) =>
+          card.cardID === editingCreditCard.cardID
+            ? { ...card, ...cleanData, memberName: member?.memberName || "" }
+            : card
+        )
       );
-      added.memberName = selectedMember ? selectedMember.memberName : "";
 
-      setData(prev => [...prev, added]);
+      setEditingCreditCard(null);
+    } catch (err) {
+      console.error("Error updating card:", err);
+      alert(err.message);
+    }
+  };
 
+  // -----------------------------
+  // ADD NEW CARD
+  // -----------------------------
+  const handleAdd = async () => {
+    const validationErrors = validateCardForm(newCreditCard);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    const cleanData = {
+      ...newCreditCard,
+      cardNumber: newCreditCard.cardNumber.replace(/\D/g, ""),
+      billingZipCode: newCreditCard.billingZipCode.replace(/\D/g, ""),
+    };
+
+    try {
+      const res = await fetch(url.url + ":35827/creditcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cleanData),
+      });
+
+      const added = await res.json();
+      const member = members.find(m => m.memberID === Number(cleanData.memberID));
+
+      added.memberName = member?.memberName || "";
+
+      setData((prev) => [...prev, added]);
+
+      // Reset
       setShowAddForm(false);
-
       setNewCreditCard({
         memberID: "",
         cardName: "",
@@ -169,11 +221,16 @@ function CreditCards(url) {
         cardExpirationDate: "",
         billingZipCode: "",
       });
+      setErrors({});
     } catch (err) {
       console.error("Add failed:", err);
+      alert(err.message);
     }
   };
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <>
       <table>
@@ -186,7 +243,7 @@ function CreditCards(url) {
             <th>Name on Card</th>
             <th>Card Number</th>
             <th>Expiration Date</th>
-            <th>Billing Zip Code</th>
+            <th>Billing ZIP</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -203,12 +260,16 @@ function CreditCards(url) {
         </tbody>
       </table>
 
-      {/* ADD NEW FORM */}
-      <button onClick={() => setShowAddForm(true)}>Add New Credit Card</button>
+      {/* ADD FORM */}
+      <button onClick={() => { setShowAddForm(true); setErrors({}); }}>
+        Add New Credit Card
+      </button>
 
       {showAddForm && (
         <div className="form">
-          <label>Member Name:</label>
+          <h3>Add Credit Card</h3>
+
+          <label>Member:</label>
           <select
             value={newCreditCard.memberID}
             onChange={(e) =>
@@ -222,6 +283,7 @@ function CreditCards(url) {
               </option>
             ))}
           </select>
+          {errors.memberID && <p className="error">{errors.memberID}</p>}
 
           <label>Name on Card:</label>
           <input
@@ -231,6 +293,7 @@ function CreditCards(url) {
               setNewCreditCard({ ...newCreditCard, cardName: e.target.value })
             }
           />
+          {errors.cardName && <p className="error">{errors.cardName}</p>}
 
           <label>Card Number:</label>
           <input
@@ -240,6 +303,7 @@ function CreditCards(url) {
               setNewCreditCard({ ...newCreditCard, cardNumber: e.target.value })
             }
           />
+          {errors.cardNumber && <p className="error">{errors.cardNumber}</p>}
 
           <label>Expiration Date:</label>
           <input
@@ -253,8 +317,11 @@ function CreditCards(url) {
               })
             }
           />
+          {errors.cardExpirationDate && (
+            <p className="error">{errors.cardExpirationDate}</p>
+          )}
 
-          <label>Zip Code:</label>
+          <label>Billing ZIP:</label>
           <input
             name="billingZipCode"
             value={newCreditCard.billingZipCode}
@@ -265,7 +332,10 @@ function CreditCards(url) {
               })
             }
           />
-          <br></br>
+          {errors.billingZipCode && (
+            <p className="error">{errors.billingZipCode}</p>
+          )}
+
           <button onClick={handleAdd}>Save</button>
           <button onClick={() => setShowAddForm(false)}>Cancel</button>
         </div>
@@ -274,7 +344,7 @@ function CreditCards(url) {
       {/* EDIT FORM */}
       {editingCreditCard && (
         <div className="form">
-          <h3>Edit Credit Card: {editingCreditCard.cardID}</h3>
+          <h3>Edit Credit Card #{editingCreditCard.cardID}</h3>
 
           <label>Member:</label>
           <select
@@ -288,6 +358,7 @@ function CreditCards(url) {
               </option>
             ))}
           </select>
+          {errors.memberID && <p className="error">{errors.memberID}</p>}
 
           <label>Name on Card:</label>
           <input
@@ -295,6 +366,7 @@ function CreditCards(url) {
             value={formData.cardName}
             onChange={handleChange}
           />
+          {errors.cardName && <p className="error">{errors.cardName}</p>}
 
           <label>Card Number:</label>
           <input
@@ -302,6 +374,7 @@ function CreditCards(url) {
             value={formData.cardNumber}
             onChange={handleChange}
           />
+          {errors.cardNumber && <p className="error">{errors.cardNumber}</p>}
 
           <label>Expiration Date:</label>
           <input
@@ -310,14 +383,20 @@ function CreditCards(url) {
             value={formData.cardExpirationDate}
             onChange={handleChange}
           />
+          {errors.cardExpirationDate && (
+            <p className="error">{errors.cardExpirationDate}</p>
+          )}
 
-          <label>Zip Code:</label>
+          <label>Billing ZIP:</label>
           <input
             name="billingZipCode"
             value={formData.billingZipCode}
             onChange={handleChange}
           />
-          <br></br>
+          {errors.billingZipCode && (
+            <p className="error">{errors.billingZipCode}</p>
+          )}
+
           <button onClick={handleUpdate}>Save</button>
           <button onClick={() => setEditingCreditCard(null)}>Cancel</button>
         </div>

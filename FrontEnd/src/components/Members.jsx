@@ -51,6 +51,8 @@ function Members(url) {
     phoneNumber: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -77,6 +79,62 @@ function Members(url) {
     fetchMembers();
   }, []); 
 
+  // Validation for new or edited member records
+  const validateMemberForm = (member) => {
+    let errors = {};
+
+    // Name
+    if (!member.memberName.trim()) {
+      errors.memberName = "Name is required.";
+    } else if (member.memberName.trim().length < 2) {
+      errors.memberName = "Name must be at least 2 characters.";
+    }
+
+    // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!member.email.trim()) {
+      errors.email = "Email is required.";
+    } else if (!emailRegex.test(member.email)) {
+      errors.email = "Invalid email format.";
+    }
+
+    // Address
+    if (!member.address.trim()) errors.address = "Address is required.";
+
+    // City
+    if (!member.city.trim()) errors.city = "City is required.";
+
+    // State
+    const stateRegex = /^[A-Za-z]{2}$/;
+    if (!member.state.trim()) {
+      errors.state = "State is required.";
+    } else if (!stateRegex.test(member.state)) {
+      errors.state = "Use 2-letter state code (e.g., CO).";
+    }
+
+    // Zip Code
+    const zipRegex = /^\d{5}$/;
+    if (!member.memberZipCode.trim()) {
+      errors.memberZipCode = "ZIP code is required.";
+    } else if (!zipRegex.test(member.memberZipCode)) {
+      errors.memberZipCode = "ZIP must be 5 digits.";
+    }
+
+    // Phone Number
+    const digitsOnly = String(member.phoneNumber || "").replace(/\D/g, "");
+    if (!digitsOnly) {
+      errors.phoneNumber = "Phone number is required.";
+    } else if (digitsOnly.length !== 10) {
+      errors.phoneNumber = "Phone must be 10 digits.";
+    }
+
+    return errors;
+  };
+
+  // Editing uses same rules
+  const validateMemberEditForm = validateMemberForm;
+
+
   // Delete handler
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
@@ -89,6 +147,7 @@ function Members(url) {
 
   // Edit handler
   const handleEdit = (member) => {
+    setErrors({});
     setEditingMember(member);
     setFormData({
       memberName: member.memberName,
@@ -108,37 +167,73 @@ function Members(url) {
 
   // Submit edit
   const handleUpdate = async () => {
-    await fetch(url.url + `:35827/members/${editingMember.memberID}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    const validationErrors = validateMemberEditForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-    setData((prev) =>
-      prev.map((member) =>
-        member.memberID === editingMember.memberID ? { ...member, ...formData } : member
-      )
-    );
-    setEditingMember(null);
+    setErrors({});
+
+    const cleanData = {
+      ...formData, // or newMember
+      phoneNumber: formData.phoneNumber.replace(/\D/g, ""),
+      memberZipCode: formData.memberZipCode.replace(/\D/g, "")
+    };
+
+    try {
+      await fetch(url.url + `:35827/members/${editingMember.memberID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cleanData),
+      });
+
+      setData((prev) =>
+        prev.map((member) =>
+          member.memberID === editingMember.memberID ? { ...member, ...cleanData } : member
+        )
+      );
+
+
+      setEditingMember(null);
+    } catch (err) {
+      console.error("Error updating member:", err);
+      alert("Could not update member: " + err.message);
+    }
   };
 
+
+  // Insert handler
   const handleAdd = async () => {
+    const validationErrors = validateMemberForm(newMember);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+
+    const cleanData = {
+      ...newMember, 
+      phoneNumber: newMember.phoneNumber.replace(/\D/g, ""),
+      memberZipCode: newMember.memberZipCode.replace(/\D/g, "")
+    };
     try {
       const response = await fetch(url.url + ":35827/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMember),
+        body: JSON.stringify(cleanData),
       });
 
-      if (!response.ok) throw new Error(`Error adding member: ${response.status}`);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Server rejected request.");
+      }
 
       const addedMember = await response.json();
-
-      // Update table instantly
       setData((prev) => [...prev, addedMember]);
       setShowAddForm(false);
 
-      // Reset form
       setNewMember({
         memberName: "",
         email: "",
@@ -150,8 +245,10 @@ function Members(url) {
       });
     } catch (err) {
       console.error(err);
+      alert("Error adding member: " + err.message);
     }
   };
+
 
     return (
       <>
@@ -176,65 +273,74 @@ function Members(url) {
             ))}
           </tbody>
         </table>
-        <button onClick={() => setShowAddForm(true)}>Add New Member</button>
+        <button onClick={() => { setShowAddForm(true); setErrors({}); }}>
+          Add New Member
+        </button>
         {showAddForm && (
           <div>
             <div>
-              <label for="memberName">Name: </label>
+              <label htmlFor="memberName">Name: </label>
               <input
                 name="memberName"
                 value={newMember.memberName}
                 onChange={(e) => setNewMember({ ...newMember, memberName: e.target.value })}
                 placeholder="Name"
               />
+              {errors.memberName && <p className="error">{errors.memberName}</p>}
               <br></br>
-              <label for="email">Email: </label>
+              <label htmlFor="email">Email: </label>
               <input
                 name="email"
                 value={newMember.email}
                 onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
                 placeholder="Email"
               />
+              {errors.email && <p className="error">{errors.email}</p>}
               <br></br>
-              <label for="address">Address: </label>              
+              <label htmlFor="address">Address: </label>              
               <input
                 name="address"
                 value={newMember.address}
                 onChange={(e) => setNewMember({ ...newMember, address: e.target.value })}
                 placeholder="Address"
               />
+              {errors.address && <p className="error">{errors.address}</p>}
               <br></br>
-              <label for="city">City: </label>              
+              <label htmlFor="city">City: </label>              
               <input
                 name="city"
                 value={newMember.city}
                 onChange={(e) => setNewMember({ ...newMember, city: e.target.value })}
                 placeholder="City"
               />
+              {errors.city && <p className="error">{errors.city}</p>}
               <br></br>
-              <label for="state">State: </label>
+              <label htmlFor="state">State: </label>
               <input
                 name="state"
                 value={newMember.state}
                 onChange={(e) => setNewMember({ ...newMember, state: e.target.value })}
                 placeholder="State"
               />
+              {errors.state && <p className="error">{errors.state}</p>}
               <br></br>
-              <label for="memberZipCode">Zip Code: </label>
+              <label htmlFor="memberZipCode">Zip Code: </label>
               <input
                 name="memberZipCode"
                 value={newMember.memberZipCode}
                 onChange={(e) => setNewMember({ ...newMember, memberZipCode: e.target.value })}
                 placeholder="Zip Code"
               /> 
+              {errors.memberZipCode && <p className="error">{errors.memberZipCode}</p>}
               <br></br>
-              <label for="phoneNumber">Phone Number: </label>             
+              <label htmlFor="phoneNumber">Phone Number: </label>             
               <input
                 name="phoneNumber"
                 value={newMember.phoneNumber}
                 onChange={(e) => setNewMember({ ...newMember, phoneNumber: e.target.value })}
                 placeholder="Phone Number"
               /> 
+              {errors.phoneNumber && <p className="error">{errors.phoneNumber}</p>}
               <br></br>
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={handleAdd}>Save</button>
@@ -247,61 +353,68 @@ function Members(url) {
         {editingMember && (
           <div>
             <h3>Edit Member: {editingMember.memberName}</h3>
-            <label for="memberName">Name: </label>
+            <label htmlFor="memberName">Name: </label>
             <input
               name="memberName"
               value={formData.memberName}
               onChange={handleChange}
               placeholder="Name"
             />
+            {errors.memberName && <p className="error">{errors.memberName}</p>}
             <br></br>
-            <label for="email">Email: </label>
+            <label htmlFor="email">Email: </label>
             <input
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
             />
+            {errors.email && <p className="error">{errors.email}</p>}
             <br></br>
-            <label for="address">Address: </label> 
+            <label htmlFor="address">Address: </label> 
             <input
               name="address"
               value={formData.address}
               onChange={handleChange}
               placeholder="Address"
             />
+            {errors.address && <p className="error">{errors.address}</p>}
             <br></br>
-            <label for="city">City: </label>
+            <label htmlFor="city">City: </label>
             <input
               name="city"
               value={formData.city}
               onChange={handleChange}
               placeholder="City"
             />
+            {errors.city && <p className="error">{errors.city}</p>}
             <br></br>
-            <label for="state">State: </label>
+            <label htmlFor="state">State: </label>
             <input
               name="state"
               value={formData.state}
               onChange={handleChange}
               placeholder="State"
             />
+            {errors.state && <p className="error">{errors.state}</p>}
             <br></br>
-            <label for="memberZipCode">Zip Code: </label>
+            <label htmlFor="memberZipCode">Zip Code: </label>
             <input
               name="memberZipCode"
               value={formData.memberZipCode}
               onChange={handleChange}
               placeholder="Zip Code"
             />
+            {errors.memberZipCode && <p className="error">{errors.memberZipCode}</p>}
             <br></br>
-            <label for="phoneNumber">Phone Number: </label>
+            <label htmlFor="phoneNumber">Phone Number: </label>
             <input
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder="Phone Number"
             />
+            {errors.phoneNumber && <p className="error">{errors.phoneNumber}</p>}
             <br></br>            
             <button onClick={handleUpdate}>Save</button>
             <button onClick={() => setEditingMember(null)}>Cancel</button>

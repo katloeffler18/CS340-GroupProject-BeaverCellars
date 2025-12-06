@@ -44,7 +44,6 @@ function Orders(url) {
     memberID: "",
     cardID: "",
     orderDate: "",
-    orderPrice: "",
     hasShipped: "",
   });
 
@@ -122,7 +121,7 @@ function Orders(url) {
         memberID: Number(newOrder.memberID),
         cardID: Number(newOrder.cardID),
         orderDate: newOrder.orderDate,
-        orderPrice: Number(newOrder.orderPrice),
+        orderPrice: 0,
         hasShipped: newOrder.hasShipped === "1"
       };
 
@@ -143,7 +142,7 @@ function Orders(url) {
       setData(prev => [...prev, added]);
       setShowAddForm(false);
 
-      setNewOrder({ memberID: "", cardID: "", orderDate: "", orderPrice: "", hasShipped: "" });
+      setNewOrder({ memberID: "", cardID: "", orderDate: "", hasShipped: "" });
     } catch (err) {
       console.error("Add failed:", err);
     }
@@ -209,13 +208,6 @@ function Orders(url) {
             type="date"
             value={newOrder.orderDate}
             onChange={e => setNewOrder({ ...newOrder, orderDate: e.target.value })}
-          />
-
-          <label>Order Price:</label>
-          <input
-            type="number"
-            value={newOrder.orderPrice}
-            onChange={e => setNewOrder({ ...newOrder, orderPrice: e.target.value })}
           />
 
           <label>Shipped:</label>

@@ -136,3 +136,9 @@ input, select {
   background-color: #ddd;
   color: black;
 }
+
+.error {
+  color: red;
+  font-size: 0.9rem;
+  margin: 2px 0 8px;
+}
