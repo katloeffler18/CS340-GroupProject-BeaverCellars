@@ -134,6 +134,8 @@ function WinesOrders(url) {
       wineQuantity: Number(newWine.wineQuantity),
     };
 
+    console.log(payload);
+    
     await fetch(url.url + `:35827/winesorders/${editingWine.winesOrdersID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
