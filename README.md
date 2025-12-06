@@ -113,7 +113,8 @@ Major prompts included:
 
 #### Backend (Stored Procedures, RESET function)
 
-- Help writing stored procedures for selecting, inserting, updating, and deleting records  
+- Help writing stored procedures for selecting, inserting, updating, and deleting records
+- Help creating RESET stored proedure around CREATE/INSERT procedures  
 - Add price calculation logic to WinesOrders stored procedures and Backend
 - Help add RESET route to backend
 
