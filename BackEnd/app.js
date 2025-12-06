@@ -5,12 +5,21 @@
 # Based on: OSU CS 340 course materials
 # Source URL: https://canvas.oregonstate.edu/courses/2017561/assignments/10111722
 */
+
     
     const cors = require('cors');
     const express = require('express');
     const app = express();
     const PORT = process.env.PORT || 35827;
     const db = require('./db-connector');
+    // Validation middleware
+    const validateWine = require('./validators/validateWine');
+    const validateMember = require('./validators/validateMember');
+    const validateCard = require('./validators/validateCard');
+    const validateOrder = require('./validators/validateOrder');
+    const validateWinesOrder = require('./validators/validateWinesOrder');
+    const validateShipment = require('./validators/validateShipment');
+
 
 
     app.use(express.json());
@@ -43,7 +52,7 @@
     });
 
     // Add new Wine
-    app.post('/wines', async (req, res) => {
+    app.post('/wines', validateWine, async (req, res) => {
         const { wineName, wineVariety, wineYear, winePrice, grapeRegion } = req.body;
 
         try {
@@ -62,7 +71,7 @@
     });
 
     // Update Wines
-    app.put('/wines/:wineID', async (req, res) => {
+    app.put('/wines/:wineID', validateWine, async (req, res) => {
         const { wineID } = req.params;
         const { wineName, wineVariety, wineYear, winePrice, grapeRegion } = req.body;
 
@@ -93,7 +102,7 @@
     });
 
     // Add new Member
-    app.post('/members', async (req, res) => {
+    app.post('/members', validateMember, async (req, res) => {
         const { memberName, email, address, city, state, memberZipCode, phoneNumber } = req.body;
 
         try {
@@ -112,7 +121,7 @@
     });
 
     // Update Member
-    app.put('/members/:memberID', async (req, res) => {
+    app.put('/members/:memberID', validateMember, async (req, res) => {
         const { memberID } = req.params;
         const { memberName, email, address, city, state, memberZipCode, phoneNumber } = req.body;
 
@@ -157,7 +166,7 @@
     });
 
     // Add Credit Card
-    app.post('/creditcards', async (req, res) => {
+    app.post('/creditcards', validateCard, async (req, res) => {
         const { memberID, cardName, cardNumber, cardExpirationDate, billingZipCode } = req.body;
 
         try {
@@ -177,7 +186,7 @@
 
 
     // Update Credit Card
-    app.put('/creditcards/:cardID', async (req, res) => {
+    app.put('/creditcards/:cardID', validateCard, async (req, res) => {
         const { cardID } = req.params;
         const { memberID, cardName, cardNumber, cardExpirationDate, billingZipCode } = req.body;
 
@@ -223,13 +232,13 @@
 
 
     // Add new Order
-    app.post('/orders', async (req, res) => {
-        const { memberID, cardID, orderDate, orderPrice, hasShipped } = req.body;
+    app.post('/orders', validateOrder, async (req, res) => {
+        const { memberID, cardID, orderDate, hasShipped } = req.body;
 
         try {
             await db.query(
                 `CALL sp_insert_order(?, ?, ?, ?, ?)`,
-                [memberID, cardID, orderDate, orderPrice, hasShipped]
+                [memberID, cardID, orderDate, 0, hasShipped]
             );
 
             const [result] = await db.query("SELECT * FROM Orders ORDER BY orderID DESC LIMIT 1");
@@ -240,16 +249,18 @@
             res.status(500).send("An error occurred while inserting the order.");
         }
     });
+
     
 
     // Update Order
-    app.put('/orders/:orderID', async (req, res) => {
+    app.put('/orders/:orderID', validateOrder, async (req, res) => {
         const { orderID } = req.params;
-        const { memberID, cardID, orderDate, orderPrice, hasShipped } = req.body;
+        const { hasShipped } = req.body;
+
         try {
             await db.query(
-                `CALL sp_update_order(?, ?, ?, ?, ?, ?)`,
-                [orderID, memberID, cardID, orderDate, orderPrice, hasShipped]
+                `CALL sp_update_order(?, ?)`,
+                [orderID, hasShipped]
             );
 
             res.status(200).json({ message: 'Order updated' });
@@ -259,6 +270,7 @@
             res.status(500).send("An error occurred while updating the order.");
         }
     });
+
 
 
     // Delete order
@@ -288,13 +300,13 @@
 
 
     // Add Wine Order
-    app.post('/winesorders', async (req, res) => {
-        const { orderID, wineID, wineQuantity, price } = req.body;
+    app.post('/winesorders', validateWinesOrder, async (req, res) => {
+        const { orderID, wineID, wineQuantity } = req.body;
 
         try {
             await db.query(
-                `CALL sp_insert_winesorder(?, ?, ?, ?)`,
-                [orderID, wineID, wineQuantity, price]
+                `CALL sp_insert_winesorder(?, ?, ?)`,
+                [orderID, wineID, wineQuantity]
             );
 
             const [result] = await db.query("SELECT * FROM WinesOrders ORDER BY winesOrdersID DESC LIMIT 1");
@@ -307,15 +319,16 @@
     });
 
 
+
     // Update Wine Order
-    app.put('/winesorders/:winesOrdersID', async (req, res) => {
+    app.put('/winesorders/:winesOrdersID', validateWinesOrder, async (req, res) => {
         const { winesOrdersID } = req.params;
-        const { orderID, wineID, wineQuantity, price } = req.body;
+        const { orderID, wineID, wineQuantity } = req.body;
 
         try {
             await db.query(
-                `CALL sp_update_winesorder(?, ?, ?, ?, ?)`,
-                [winesOrdersID, orderID, wineID, wineQuantity, price]
+                `CALL sp_update_winesorder(?, ?, ?, ?)`,
+                [winesOrdersID, orderID, wineID, wineQuantity]
             );
 
             res.status(200).json({ message: 'Wine order updated' });
@@ -327,17 +340,19 @@
     });
 
 
+
     // Delete wine order
     app.delete('/winesorders/:winesOrdersID', async (req, res) => {
         try {
-            await db.query(`call sp_delete_winesorder(${req.params.winesOrdersID})`);
+            await db.query(`CALL sp_delete_winesorders(${req.params.winesOrdersID})`);
             res.status(200).json({ message: 'Wine order deleted' });
 
         } catch (error) {
             console.error("Error executing queries:", error);
-            res.status(500).send("An error occurred while executing the database queries.");
+            res.status(500).send("An error occurred while deleting the wine order.");
         }
-        });
+    });
+
 
     
     // Get Shipments
@@ -354,7 +369,7 @@
 
     
     // Add Shipment
-    app.post('/shipments', async (req, res) => {
+    app.post('/shipments', validateShipment, async (req, res) => {
         const { orderID, shipmentDate, carrier, trackingNumber } = req.body;
 
         try {

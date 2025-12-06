@@ -143,6 +143,31 @@ DELIMITER ;
 
 
 -- ===========================================
+-- HELPER FUNCTIONS
+-- ===========================================
+
+-- Helper function to calculate order price total based on wines in WinesOrders
+DROP PROCEDURE IF EXISTS sp_recalculate_order_total;
+DELIMITER //
+
+CREATE PROCEDURE sp_recalculate_order_total(IN p_orderID INT)
+BEGIN
+    DECLARE total DECIMAL(10,2);
+
+    SELECT COALESCE(SUM(price), 0)
+    INTO total
+    FROM WinesOrders
+    WHERE orderID = p_orderID;
+
+    UPDATE Orders
+    SET orderPrice = total
+    WHERE orderID = p_orderID;
+END //
+
+DELIMITER ;
+
+
+-- ===========================================
 -- DELETES
 -- ===========================================
 
@@ -337,6 +362,7 @@ END //
 
 DELIMITER ;
 
+
 -- Insert a new card into CreditCards
 DROP PROCEDURE IF EXISTS sp_insert_card;
 DELIMITER //
@@ -366,6 +392,7 @@ BEGIN
 END //
 
 DELIMITER ;
+
 
 -- Insert a new order into Orders
 DROP PROCEDURE IF EXISTS sp_insert_order;
@@ -397,6 +424,25 @@ END //
 
 DELIMITER ;
 
+
+-- Trigger to calculate price of wines in WinesOrders based on quantity
+DROP TRIGGER IF EXISTS trg_winesorders_price_insert;
+DELIMITER //
+CREATE TRIGGER trg_winesorders_price_insert
+BEFORE INSERT ON WinesOrders
+FOR EACH ROW
+BEGIN
+    DECLARE base_price DECIMAL(10,2);
+
+    SELECT winePrice INTO base_price
+    FROM Wines
+    WHERE wineID = NEW.wineID;
+
+    SET NEW.price = base_price * NEW.wineQuantity;
+END //
+DELIMITER ;
+
+
 -- Insert a new wine into WinesOrders
 DROP PROCEDURE IF EXISTS sp_insert_winesorder;
 DELIMITER //
@@ -404,8 +450,7 @@ DELIMITER //
 CREATE PROCEDURE sp_insert_winesorder(
     IN p_orderID INT,
     IN p_wineID INT,
-    IN p_wineQuantity INT,
-    IN p_price DECIMAL(10,2)
+    IN p_wineQuantity INT
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -416,8 +461,8 @@ BEGIN
 
     START TRANSACTION;
 
-    INSERT INTO WinesOrders (orderID, wineID, wineQuantity, price)
-    VALUES (p_orderID, p_wineID, p_wineQuantity, p_price);
+    INSERT INTO WinesOrders (orderID, wineID, wineQuantity)
+    VALUES (p_orderID, p_wineID, p_wineQuantity);
 
     COMMIT;
 
@@ -425,6 +470,7 @@ BEGIN
 END //
 
 DELIMITER ;
+
 
 -- Add new shipment to Shipments
 DROP PROCEDURE IF EXISTS sp_insert_shipment;
@@ -574,16 +620,13 @@ END //
 
 DELIMITER ;
 
+
 -- Update existing order
 DROP PROCEDURE IF EXISTS sp_update_order;
 DELIMITER //
 
 CREATE PROCEDURE sp_update_order(
     IN p_orderID INT,
-    IN p_memberID INT,
-    IN p_cardID INT,
-    IN p_orderDate DATE,
-    IN p_orderPrice DECIMAL(10,2),
     IN p_hasShipped TINYINT
 )
 BEGIN
@@ -607,6 +650,25 @@ END //
 
 DELIMITER ;
 
+
+-- Trigger to update price of wines in WinesOrders based on quantity
+DROP TRIGGER IF EXISTS trg_winesorders_price_update;
+DELIMITER //
+CREATE TRIGGER trg_winesorders_price_update
+BEFORE UPDATE ON WinesOrders
+FOR EACH ROW
+BEGIN
+    DECLARE base_price DECIMAL(10,2);
+
+    SELECT winePrice INTO base_price
+    FROM Wines
+    WHERE wineID = NEW.wineID;
+
+    SET NEW.price = base_price * NEW.wineQuantity;
+END //
+DELIMITER ;
+
+
 -- Update wine in WinesOrders
 DROP PROCEDURE IF EXISTS sp_update_winesorder;
 DELIMITER //
@@ -615,8 +677,7 @@ CREATE PROCEDURE sp_update_winesorder(
     IN p_winesOrdersID INT,
     IN p_orderID INT,
     IN p_wineID INT,
-    IN p_wineQuantity INT,
-    IN p_price DECIMAL(10,2)
+    IN p_wineQuantity INT
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -629,9 +690,9 @@ BEGIN
 
     UPDATE WinesOrders
     SET
+        orderID = p_orderID,
         wineID = p_wineID,
-        wineQuantity = p_wineQuantity,
-        price = p_price
+        wineQuantity = p_wineQuantity
     WHERE winesOrdersID = p_winesOrdersID;
 
     COMMIT;
@@ -639,4 +700,44 @@ BEGIN
     SELECT 'Wine order updated successfully' AS Result;
 END //
 
+DELIMITER ;
+
+
+-- ===========================================
+-- FINAL ORDER TOTAL TRIGGERS (AFTER INSERT, UPDATE, DELETE)
+-- ===========================================
+
+-- Trigger to calculate order total after insert into WinesOrders
+DROP TRIGGER IF EXISTS trg_order_total_after_insert;
+DELIMITER //
+CREATE TRIGGER trg_order_total_after_insert
+AFTER INSERT ON WinesOrders
+FOR EACH ROW
+BEGIN
+    CALL sp_recalculate_order_total(NEW.orderID);
+END //
+DELIMITER ;
+
+
+-- Trigger to recalculate order total after an update to WinesOrders
+DROP TRIGGER IF EXISTS trg_order_total_after_update;
+DELIMITER //
+CREATE TRIGGER trg_order_total_after_update
+AFTER UPDATE ON WinesOrders
+FOR EACH ROW
+BEGIN
+    CALL sp_recalculate_order_total(NEW.orderID);
+END //
+DELIMITER ;
+
+
+-- Trigger to recalculate order total after delete in WinesOrders
+DROP TRIGGER IF EXISTS trg_order_total_after_delete;
+DELIMITER //
+CREATE TRIGGER trg_order_total_after_delete
+AFTER DELETE ON WinesOrders
+FOR EACH ROW
+BEGIN
+    CALL sp_recalculate_order_total(OLD.orderID);
+END //
 DELIMITER ;
