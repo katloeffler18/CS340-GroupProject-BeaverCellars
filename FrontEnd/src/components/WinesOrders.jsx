@@ -80,6 +80,10 @@ function WinesOrders(url) {
   // Delete handler
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
+    console.log("filter")
+    console.log(data.filter(wo => wo.winesOrdersID === id))
+    console.log("data")
+    console.log(data)
     const orderID = data.filter(wo => wo.winesOrdersID === id).orderID;
     const payload = {
       orderID: Number(orderID),
