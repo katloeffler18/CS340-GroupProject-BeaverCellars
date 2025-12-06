@@ -434,6 +434,9 @@ CREATE PROCEDURE sp_insert_winesorder(
     IN p_wineQuantity INT
 )
 BEGIN
+    DECLARE v_winePrice DECIMAL(10,2);
+    DECLARE v_totalPrice DECIMAL(10,2);
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -442,8 +445,17 @@ BEGIN
 
     START TRANSACTION;
 
-    INSERT INTO WinesOrders (orderID, wineID, wineQuantity)
-    VALUES (p_orderID, p_wineID, p_wineQuantity);
+    -- Get the price of the wine
+    SELECT winePrice INTO v_winePrice
+    FROM Wines
+    WHERE wineID = p_wineID;
+
+    -- Calculate total price
+    SET v_totalPrice = v_winePrice * p_wineQuantity;
+
+    -- Insert the new record with calculated price
+    INSERT INTO WinesOrders (orderID, wineID, wineQuantity, price)
+    VALUES (p_orderID, p_wineID, p_wineQuantity, v_totalPrice);
 
     COMMIT;
 
@@ -451,6 +463,7 @@ BEGIN
 END //
 
 DELIMITER ;
+
 
 
 -- Add new shipment to Shipments
@@ -643,6 +656,9 @@ CREATE PROCEDURE sp_update_winesorder(
     IN p_wineQuantity INT
 )
 BEGIN
+    DECLARE v_winePrice DECIMAL(10,2);
+    DECLARE v_totalPrice DECIMAL(10,2);
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -651,11 +667,21 @@ BEGIN
 
     START TRANSACTION;
 
+    -- Get the price of the wine
+    SELECT winePrice INTO v_winePrice
+    FROM Wines
+    WHERE wineID = p_wineID;
+
+    -- Calculate total price
+    SET v_totalPrice = v_winePrice * p_wineQuantity;
+
+    -- Update the record with recalculated price
     UPDATE WinesOrders
     SET
         orderID = p_orderID,
         wineID = p_wineID,
-        wineQuantity = p_wineQuantity
+        wineQuantity = p_wineQuantity,
+        price = v_totalPrice
     WHERE winesOrdersID = p_winesOrdersID;
 
     COMMIT;
