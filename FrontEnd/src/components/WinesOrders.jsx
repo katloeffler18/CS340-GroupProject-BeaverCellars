@@ -45,7 +45,6 @@ function WinesOrders(url) {
     orderID: "",
     wineID: "",
     wineQuantity: "",
-    price: "",
   });
 
   // Fetch all data
@@ -215,13 +214,6 @@ function WinesOrders(url) {
             name="wineQuantity"
             value={newWine.wineQuantity}
             onChange={(e) => setNewWine({ ...newWine, wineQuantity: e.target.value })}
-          />
-
-          <label>Price:</label>
-          <input
-            name="price"
-            value={newWine.price}
-            onChange={(e) => setNewWine({ ...newWine, price: e.target.value })}
           />
 
           <br />
