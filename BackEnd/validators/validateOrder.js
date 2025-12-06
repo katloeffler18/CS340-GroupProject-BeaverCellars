@@ -19,10 +19,5 @@ module.exports = function validateOrder(req, res, next) {
         return res.status(400).json({ error: "hasShipped must be 0 or 1." });
     }
 
-    // Prevent client from adding orderPrice manually
-    if ("orderPrice" in req.body) {
-        return res.status(400).json({ error: "orderPrice cannot be set manually." });
-    }
-
     next();
 };

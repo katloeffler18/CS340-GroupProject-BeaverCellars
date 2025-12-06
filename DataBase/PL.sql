@@ -424,25 +424,6 @@ END //
 
 DELIMITER ;
 
-
--- Trigger to calculate price of wines in WinesOrders based on quantity
-DROP TRIGGER IF EXISTS trg_winesorders_price_insert;
-DELIMITER //
-CREATE TRIGGER trg_winesorders_price_insert
-BEFORE INSERT ON WinesOrders
-FOR EACH ROW
-BEGIN
-    DECLARE base_price DECIMAL(10,2);
-
-    SELECT winePrice INTO base_price
-    FROM Wines
-    WHERE wineID = NEW.wineID;
-
-    SET NEW.price = base_price * NEW.wineQuantity;
-END //
-DELIMITER ;
-
-
 -- Insert a new wine into WinesOrders
 DROP PROCEDURE IF EXISTS sp_insert_winesorder;
 DELIMITER //
@@ -651,24 +632,6 @@ END //
 DELIMITER ;
 
 
--- Trigger to update price of wines in WinesOrders based on quantity
-DROP TRIGGER IF EXISTS trg_winesorders_price_update;
-DELIMITER //
-CREATE TRIGGER trg_winesorders_price_update
-BEFORE UPDATE ON WinesOrders
-FOR EACH ROW
-BEGIN
-    DECLARE base_price DECIMAL(10,2);
-
-    SELECT winePrice INTO base_price
-    FROM Wines
-    WHERE wineID = NEW.wineID;
-
-    SET NEW.price = base_price * NEW.wineQuantity;
-END //
-DELIMITER ;
-
-
 -- Update wine in WinesOrders
 DROP PROCEDURE IF EXISTS sp_update_winesorder;
 DELIMITER //
@@ -700,44 +663,4 @@ BEGIN
     SELECT 'Wine order updated successfully' AS Result;
 END //
 
-DELIMITER ;
-
-
--- ===========================================
--- FINAL ORDER TOTAL TRIGGERS (AFTER INSERT, UPDATE, DELETE)
--- ===========================================
-
--- Trigger to calculate order total after insert into WinesOrders
-DROP TRIGGER IF EXISTS trg_order_total_after_insert;
-DELIMITER //
-CREATE TRIGGER trg_order_total_after_insert
-AFTER INSERT ON WinesOrders
-FOR EACH ROW
-BEGIN
-    CALL sp_recalculate_order_total(NEW.orderID);
-END //
-DELIMITER ;
-
-
--- Trigger to recalculate order total after an update to WinesOrders
-DROP TRIGGER IF EXISTS trg_order_total_after_update;
-DELIMITER //
-CREATE TRIGGER trg_order_total_after_update
-AFTER UPDATE ON WinesOrders
-FOR EACH ROW
-BEGIN
-    CALL sp_recalculate_order_total(NEW.orderID);
-END //
-DELIMITER ;
-
-
--- Trigger to recalculate order total after delete in WinesOrders
-DROP TRIGGER IF EXISTS trg_order_total_after_delete;
-DELIMITER //
-CREATE TRIGGER trg_order_total_after_delete
-AFTER DELETE ON WinesOrders
-FOR EACH ROW
-BEGIN
-    CALL sp_recalculate_order_total(OLD.orderID);
-END //
 DELIMITER ;

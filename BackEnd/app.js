@@ -405,6 +405,86 @@
     app.post('/reset-database', async (req, res) => {
         try {
             const [rows] = await db.query("CALL ResetBeaverCellars()");
+            await db.query(`
+            --------------------------------------------------------
+            -- Stored Procedure: Recalculate Order Total
+            --------------------------------------------------------
+            DROP PROCEDURE IF EXISTS sp_recalculate_order_total;
+            CREATE PROCEDURE sp_recalculate_order_total(IN p_orderID INT)
+            BEGIN
+                DECLARE new_total DECIMAL(10,2);
+
+                SELECT IFNULL(SUM(price), 0)
+                INTO new_total
+                FROM WinesOrders
+                WHERE orderID = p_orderID;
+
+                UPDATE Orders
+                SET orderPrice = new_total
+                WHERE orderID = p_orderID;
+            END;
+
+            --------------------------------------------------------
+            -- TRIGGERS FOR WINESORDERS + ORDER TOTAL MANAGEMENT
+            --------------------------------------------------------
+
+            -- BEFORE INSERT: compute price from winePrice × quantity
+            DROP TRIGGER IF EXISTS trg_winesorders_price_insert;
+            CREATE TRIGGER trg_winesorders_price_insert
+            BEFORE INSERT ON WinesOrders
+            FOR EACH ROW
+            BEGIN
+                DECLARE base_price DECIMAL(10,2);
+
+                SELECT winePrice INTO base_price
+                FROM Wines
+                WHERE wineID = NEW.wineID;
+
+                SET NEW.price = base_price * NEW.wineQuantity;
+            END;
+
+            -- BEFORE UPDATE: recompute price
+            DROP TRIGGER IF EXISTS trg_winesorders_price_update;
+            CREATE TRIGGER trg_winesorders_price_update
+            BEFORE UPDATE ON WinesOrders
+            FOR EACH ROW
+            BEGIN
+                DECLARE base_price DECIMAL(10,2);
+
+                SELECT winePrice INTO base_price
+                FROM Wines
+                WHERE wineID = NEW.wineID;
+
+                SET NEW.price = base_price * NEW.wineQuantity;
+            END;
+
+            -- AFTER INSERT: recalc order total
+            DROP TRIGGER IF EXISTS trg_order_total_after_insert;
+            CREATE TRIGGER trg_order_total_after_insert
+            AFTER INSERT ON WinesOrders
+            FOR EACH ROW
+            BEGIN
+                CALL sp_recalculate_order_total(NEW.orderID);
+            END;
+
+            -- AFTER UPDATE: recalc order total
+            DROP TRIGGER IF EXISTS trg_order_total_after_update;
+            CREATE TRIGGER trg_order_total_after_update
+            AFTER UPDATE ON WinesOrders
+            FOR EACH ROW
+            BEGIN
+                CALL sp_recalculate_order_total(NEW.orderID);
+            END;
+
+            -- AFTER DELETE: recalc order total
+            DROP TRIGGER IF EXISTS trg_order_total_after_delete;
+            CREATE TRIGGER trg_order_total_after_delete
+            AFTER DELETE ON WinesOrders
+            FOR EACH ROW
+            BEGIN
+                CALL sp_recalculate_order_total(OLD.orderID);
+            END;
+            `);
             res.status(200).json({
                 message: "Database reset successfully",
                 result: rows

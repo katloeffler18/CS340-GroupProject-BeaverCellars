@@ -147,6 +147,7 @@ BEGIN
     COMMIT;
 
     SELECT 'SUCCESS: Beaver Cellars database has been fully reset.' AS message;
+
 END //
 
 DELIMITER ;
