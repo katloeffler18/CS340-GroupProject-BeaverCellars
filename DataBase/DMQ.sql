@@ -1,8 +1,9 @@
 -- =========================================================
 -- Beaver Cellars - Data Manipulation Queries
 -- Last Updated: 12/5/2025
--- Written in Step 4 format, but consistent with server-side triggers & procedures
+-- Written in Step 4 format, but consistent with server-side procedures
 -- Authors: Fuhai Feng and Kat Loeffler
+-- All work is our own
 -- =========================================================
 
 
@@ -84,7 +85,7 @@ INSERT INTO CreditCards (memberID, cardName, cardNumber, cardExpirationDate, bil
 VALUES (@memberIDInput, @cardNameInput, @cardNumberInput, @cardExpirationDateInput, @billingZipCodeInput);
 
 -- Insert new order 
--- NOTE: orderPrice is NOT inserted manually (auto-updated via triggers)
+-- NOTE: orderPrice is NOT inserted manually (auto-calculated based on WinesOrders)
 INSERT INTO Orders (memberID, cardID, orderDate, orderPrice, hasShipped)
 VALUES (@memberIDInput, @cardIDInput, @orderDateInput, 0, @hasShippedInput);
 
@@ -93,8 +94,8 @@ INSERT INTO Shipments (orderID, shipmentDate, carrier, trackingNumber)
 VALUES (@orderIDInput, @shipmentDateInput, @carrierInput, @trackingInput);
 
 -- Insert new wine into an order
--- NOTE: price is NOT manually inserted (calculated by triggers)
-INSERT INTO WinesOrders (orderID, wineID, wineQuantity)
+-- NOTE: price is NOT manually inserted (auto-calculated)
+INSERT INTO WinesOrders (orderID, wineID, wineQuantity, price)
 VALUES (@orderIDInput, @wineIDInput, @wineQuantityInput);
 
 
@@ -134,7 +135,7 @@ SET hasShipped = @newHasShippedInput
 WHERE orderID = @orderIDInput;
 
 -- Update wine in an order
--- NOTE: price automatically recalculated by trigger
+-- NOTE: price automatically recalculated
 UPDATE WinesOrders
 SET wineID = @newWineIDInput,
     wineQuantity = @newWineQuantityInput

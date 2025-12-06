@@ -1,3 +1,9 @@
+/*
+# Home Component
+# Date: 11/19/2025
+# All my own work
+*/
+
 import React from "react";
 
 function HomePage() {

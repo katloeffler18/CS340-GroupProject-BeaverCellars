@@ -1,6 +1,6 @@
 /*
 # CreditCards Component
-# Date: 11/19/2025
+# Date: 11/19/2025, Updated: 12/5/2025
 # Citation for use of AI Tools:
   # Prompt: Help me implement add, edit, and delete functionality, validation, and member dropdown
   # AI Source URL: https://chatgpt.com/

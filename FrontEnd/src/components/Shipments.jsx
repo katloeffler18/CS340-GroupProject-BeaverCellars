@@ -1,9 +1,8 @@
 /*
 # Shipments Component
-# Date: 11/30/2025
+# Date: 11/30/2025, Updated 12/4/2025
 # Citation for use of AI Tools:
-  # Prompt: Fix Shipments add form to immediately show member name
-  # Add validation to Shipments add form
+  # Prompt: Implement add/delete functionality and add validation for add form
   # AI Source URL: https://chatgpt.com/
 */
 

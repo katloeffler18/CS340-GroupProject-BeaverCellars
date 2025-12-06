@@ -1,8 +1,8 @@
 /*
 # Citation for the following code:
-# Date: 2025-11-19
-# AI-assisted: Reset database endpoint was generated with AI help (ChatGPT)
-# Based on: OSU CS 340 course materials
+# Date: 2025-11-19, updated 2025-12-4
+# AI-assisted: Reset database endpoint and validation was generated with AI help (ChatGPT)
+# Based on: OSU CS 340 course materials for setup
 # Source URL: https://canvas.oregonstate.edu/courses/2017561/assignments/10111722
 */
 

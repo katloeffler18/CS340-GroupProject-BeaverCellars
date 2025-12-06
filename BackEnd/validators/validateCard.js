@@ -1,4 +1,8 @@
-// validators/validateCard.js
+/*
+# Citation for the following code:
+# Date: 2025-12-4
+# AI-assisted: Added validation in backend with AI help (ChatGPT)
+*/
 
 module.exports = function validateCard(req, res, next) {
     const {cardName, cardNumber, cardExpirationDate, billingZipCode } = req.body;

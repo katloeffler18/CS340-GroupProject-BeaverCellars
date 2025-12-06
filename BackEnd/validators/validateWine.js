@@ -1,4 +1,8 @@
-// validators/validateWine.js
+/*
+# Citation for the following code:
+# Date: 2025-12-4
+# AI-assisted: Added validation in backend with AI help (ChatGPT)
+*/
 
 module.exports = function validateWine(req, res, next) {
     const { wineName, wineVariety, wineYear, winePrice, grapeRegion } = req.body;

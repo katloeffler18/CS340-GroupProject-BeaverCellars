@@ -1,10 +1,8 @@
 /*
 # Orders Component
-# Date: 11/30/2025
+# Date: 11/30/2025, Updated 12/4/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete functionality
-  # Fix Orders add/edit forms, dropdowns, and database update
-  # Add frontend validation for Add Order form
+  # Prompt: Implement add/edit/delete functionality and add validation for add form
   # AI Source URL: https://chatgpt.com/
 */
 

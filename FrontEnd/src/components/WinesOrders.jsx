@@ -1,6 +1,6 @@
 /*
 # WinesOrders Component
-# Date: 11/30/2025
+# Date: 11/30/2025, Updated 12/4/2025
 # Citation for use of AI Tools:
   # Prompt: Implement add/edit/delete functionality and add validation for both add/edit forms
   # AI Source URL: https://chatgpt.com/
@@ -143,21 +143,6 @@ function WinesOrders(url) {
     const woRes = await fetch(url.url + ":35827/winesorders");
     const woData = await woRes.json();
     setData(woData);
-    // const selectedOrder = orders.find(o => o.orderID === Number(formData.orderID));
-    // const selectedWine = wines.find(w => w.wineID === Number(formData.wineID));
-    
-    // setData(prev =>
-    //   prev.map(wo =>
-    //     wo.winesOrdersID === editingWine.winesOrdersID
-    //       ? {
-    //           ...wo,
-    //           ...formData,
-    //           memberName: selectedOrder ? selectedOrder.memberName : "",
-    //           wineName: selectedWine ? selectedWine.wineName : "",
-    //         }
-    //       : wo
-    //   )
-    // );
 
     setEditingWine(null);
   };

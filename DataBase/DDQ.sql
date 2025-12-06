@@ -1,7 +1,10 @@
 -- Beaver Cellars Database
--- Stored Procedure for RESET Function
+-- Stored Procedure for RESET Function with CREATE/INSERT
 -- Created by Kat Loeffler & Fuhai Feng
--- Step 4: PL/SQL Stored Procedure + RESET
+-- If AI tools were used: 
+-- -- Generated with assistance from ChatGPT using prompt "Can you help me add
+-- -- a RESET procudure to our CREATEs and INSERTs?"
+
 
 
 DROP PROCEDURE IF EXISTS ResetBeaverCellars;

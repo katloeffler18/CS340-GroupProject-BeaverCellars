@@ -1,7 +1,7 @@
 /*
 # Citation for the following code:
 # Date: 2025-11-19
-# Based on: OSU CS 340 course materials
+# Based on: OSU CS 340 course materials for connecting to DB
 # Source URL: https://canvas.oregonstate.edu/courses/2017561/assignments/10111722
 */
 

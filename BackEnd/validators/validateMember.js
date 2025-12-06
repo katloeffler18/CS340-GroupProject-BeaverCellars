@@ -1,4 +1,8 @@
-// validators/validateMember.js
+/*
+# Citation for the following code:
+# Date: 2025-12-4
+# AI-assisted: Added validation in backend with AI help (ChatGPT)
+*/
 
 module.exports = function validateMember(req, res, next) {
     const { memberName, email, address, city, state, memberZipCode, phoneNumber } = req.body;

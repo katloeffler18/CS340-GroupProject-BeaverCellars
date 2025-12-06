@@ -2,7 +2,8 @@
 # Citation for the following code:
 # Date: 2025-11-19
 # AI-assisted: Reset database button handler was adapted with AI help (ChatGPT)
-# Source URL: N/A
+  # Prompt: Help me add a reset button to the navigation bar
+  # Source URL: chatgpt.com
 */
 
 import './App.css';

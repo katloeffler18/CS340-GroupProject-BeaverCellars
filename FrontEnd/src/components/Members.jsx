@@ -1,9 +1,9 @@
 /*
 # Members Component
-# Date: 11/19/2025
+# Date: 11/19/2025, Updated: 12/4/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete functionality
-  # AI Source URL: https://chatgpt.com/ 
+  # Prompt: Help me implement add, edit, and delete functionality and validation
+  # AI Source URL: https://chatgpt.com/
 */
 
 import React, { useState, useEffect } from 'react';
