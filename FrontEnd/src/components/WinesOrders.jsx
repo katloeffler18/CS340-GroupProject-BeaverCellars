@@ -127,11 +127,16 @@ function WinesOrders(url) {
 
   // Add new wine order
   const handleAdd = async () => {
+    const payload = {
+      orderID: parseInt(newWine.orderID, 10),
+      wineID: parseInt(newWine.wineID, 10),
+      wineQuantity: parseInt(newWine.wineQuantity, 10),
+    };
     try {
       const response = await fetch(url.url + ":35827/winesorders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newWine),
+        body: JSON.stringify(payload),
       });
 
       const added = await response.json();
