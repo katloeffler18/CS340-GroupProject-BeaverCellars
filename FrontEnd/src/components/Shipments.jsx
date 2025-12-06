@@ -3,7 +3,7 @@
 # Date: 11/30/2025
 # Citation for use of AI Tools:
   # Prompt: Fix Shipments add form to immediately show member name
-  # Help me implement add, edit, and delete functionality
+  # Add validation to Shipments add form
   # AI Source URL: https://chatgpt.com/
 */
 
@@ -28,7 +28,7 @@ function ShipmentItem({ shipment, handleDelete }) {
 
 function Shipments(url) {
   const [data, setData] = useState([]);
-  const [orders, setOrders] = useState([]); // needed for member names
+  const [orders, setOrders] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
 
   const [newShipment, setNewShipment] = useState({
@@ -38,7 +38,9 @@ function Shipments(url) {
     trackingNumber: "",
   });
 
-  // Load shipments and orders
+  const [errors, setErrors] = useState({}); // NEW validation state
+
+  // Load shipments + orders
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,6 +56,7 @@ function Shipments(url) {
 
         setData(shipmentsData);
         setOrders(ordersData);
+
       } catch (err) {
         console.error("Error fetching shipments or orders:", err);
       }
@@ -69,8 +72,28 @@ function Shipments(url) {
     setData(data.filter(s => s.shipmentID !== id));
   };
 
-  // Add new shipment
+  // Validation
+  const validateShipment = (s) => {
+    let errs = {};
+
+    if (!s.orderID) errs.orderID = "Order is required.";
+    if (!s.shipmentDate) errs.shipmentDate = "Shipment date is required.";
+    if (!s.carrier.trim()) errs.carrier = "Carrier is required.";
+    if (!s.trackingNumber.trim()) errs.trackingNumber = "Tracking number is required.";
+
+    return errs;
+  };
+
+  // Add shipment
   const handleAdd = async () => {
+    const validationErrors = validateShipment(newShipment);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({}); // clear errors
+
     try {
       const payload = { ...newShipment, orderID: Number(newShipment.orderID) };
 
@@ -82,7 +105,7 @@ function Shipments(url) {
 
       const added = await response.json();
 
-      // Attach memberName from orders table
+      // Attach memberName
       const order = orders.find(o => o.orderID === Number(newShipment.orderID));
       added.memberName = order ? order.memberName : "";
 
@@ -90,6 +113,7 @@ function Shipments(url) {
       setShowAddForm(false);
 
       setNewShipment({ orderID: "", shipmentDate: "", carrier: "", trackingNumber: "" });
+
     } catch (err) {
       console.error("Add failed:", err);
     }
@@ -117,7 +141,9 @@ function Shipments(url) {
         </tbody>
       </table>
 
-      <button onClick={() => setShowAddForm(true)}>Add New Shipment</button>
+      <button onClick={() => { setShowAddForm(true); setErrors({}); }}>
+        Add New Shipment
+      </button>
 
       {showAddForm && (
         <div className="form">
@@ -126,7 +152,10 @@ function Shipments(url) {
           <label>Order ID:</label>
           <select
             value={newShipment.orderID}
-            onChange={e => setNewShipment({ ...newShipment, orderID: e.target.value })}
+            onChange={e => {
+              setNewShipment({ ...newShipment, orderID: e.target.value });
+              setErrors(prev => ({ ...prev, orderID: "" }));
+            }}
           >
             <option value="">Select Order</option>
             {orders.map(o => (
@@ -135,25 +164,38 @@ function Shipments(url) {
               </option>
             ))}
           </select>
+          {errors.orderID && <p className="error">{errors.orderID}</p>}
 
           <label>Shipment Date:</label>
           <input
             type="date"
             value={newShipment.shipmentDate}
-            onChange={e => setNewShipment({ ...newShipment, shipmentDate: e.target.value })}
+            onChange={e => {
+              setNewShipment({ ...newShipment, shipmentDate: e.target.value });
+              setErrors(prev => ({ ...prev, shipmentDate: "" }));
+            }}
           />
+          {errors.shipmentDate && <p className="error">{errors.shipmentDate}</p>}
 
           <label>Carrier:</label>
           <input
             value={newShipment.carrier}
-            onChange={e => setNewShipment({ ...newShipment, carrier: e.target.value })}
+            onChange={e => {
+              setNewShipment({ ...newShipment, carrier: e.target.value });
+              setErrors(prev => ({ ...prev, carrier: "" }));
+            }}
           />
+          {errors.carrier && <p className="error">{errors.carrier}</p>}
 
           <label>Tracking Number:</label>
           <input
             value={newShipment.trackingNumber}
-            onChange={e => setNewShipment({ ...newShipment, trackingNumber: e.target.value })}
+            onChange={e => {
+              setNewShipment({ ...newShipment, trackingNumber: e.target.value });
+              setErrors(prev => ({ ...prev, trackingNumber: "" }));
+            }}
           />
+          {errors.trackingNumber && <p className="error">{errors.trackingNumber}</p>}
 
           <br />
           <button onClick={handleAdd}>Save</button>
