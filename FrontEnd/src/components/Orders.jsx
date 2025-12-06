@@ -4,6 +4,7 @@
 # Citation for use of AI Tools:
   # Prompt: Help me implement add, edit, and delete functionality
   # Fix Orders add/edit forms, dropdowns, and database update
+  # Add frontend validation for Add Order form
   # AI Source URL: https://chatgpt.com/
 */
 
@@ -35,10 +36,9 @@ function Orders(url) {
   const [cards, setCards] = useState([]);     // credit cards table
 
   const [editingOrder, setEditingOrder] = useState(null);
-  const [formData, setFormData] = useState({
-    hasShipped: "",
-  });
+  const [formData, setFormData] = useState({ hasShipped: "" });
 
+  // ADD FORM STATE
   const [showAddForm, setShowAddForm] = useState(false);
   const [newOrder, setNewOrder] = useState({
     memberID: "",
@@ -46,6 +46,8 @@ function Orders(url) {
     orderDate: "",
     hasShipped: "",
   });
+
+  const [errors, setErrors] = useState({}); // <-- NEW
 
   // Load orders, members, and credit cards
   useEffect(() => {
@@ -115,7 +117,33 @@ function Orders(url) {
     setEditingOrder(null);
   };
 
+  // -------------------------
+  //   VALIDATION FOR ADD FORM
+  // -------------------------
+  const validateOrderForm = (order) => {
+    let errors = {};
+
+    if (!order.memberID) errors.memberID = "Member is required.";
+    if (!order.cardID) errors.cardID = "Credit card is required.";
+    if (!order.orderDate) errors.orderDate = "Order date is required.";
+    if (order.hasShipped !== "1" && order.hasShipped !== "0")
+      errors.hasShipped = "Shipping status is required.";
+
+    return errors;
+  };
+
+  // -------------------------
+  //      ADD ORDER SUBMIT
+  // -------------------------
   const handleAdd = async () => {
+    const validationErrors = validateOrderForm(newOrder);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({}); // Clear errors when valid
+
     try {
       const payload = {
         memberID: Number(newOrder.memberID),
@@ -143,6 +171,7 @@ function Orders(url) {
       setShowAddForm(false);
 
       setNewOrder({ memberID: "", cardID: "", orderDate: "", hasShipped: "" });
+
     } catch (err) {
       console.error("Add failed:", err);
     }
@@ -178,51 +207,72 @@ function Orders(url) {
       </table>
 
       {/* Add new order */}
-      <button onClick={() => setShowAddForm(true)}>Add New Order</button>
+      <button onClick={() => { setShowAddForm(true); setErrors({}); }}>
+        Add New Order
+      </button>
+
       {showAddForm && (
         <div className="form">
           <label>Member:</label>
           <select
             value={newOrder.memberID}
-            onChange={e => setNewOrder({ ...newOrder, memberID: e.target.value })}
+            onChange={e => {
+              setNewOrder({ ...newOrder, memberID: e.target.value });
+              setErrors({ ...errors, memberID: "" });
+            }}
           >
             <option value="">Select Member</option>
             {members.map(m => (
               <option key={m.memberID} value={m.memberID}>{m.memberName}</option>
             ))}
           </select>
+          {errors.memberID && <p className="error">{errors.memberID}</p>}
 
           <label>Card:</label>
           <select
             value={newOrder.cardID}
-            onChange={e => setNewOrder({ ...newOrder, cardID: e.target.value })}
+            onChange={e => {
+              setNewOrder({ ...newOrder, cardID: e.target.value });
+              setErrors({ ...errors, cardID: "" });
+            }}
           >
             <option value="">Select Card</option>
             {cards.map(c => (
               <option key={c.cardID} value={c.cardID}>{c.cardName}</option>
             ))}
           </select>
+          {errors.cardID && <p className="error">{errors.cardID}</p>}
 
           <label>Order Date:</label>
           <input
             type="date"
             value={newOrder.orderDate}
-            onChange={e => setNewOrder({ ...newOrder, orderDate: e.target.value })}
+            onChange={e => {
+              setNewOrder({ ...newOrder, orderDate: e.target.value });
+              setErrors({ ...errors, orderDate: "" });
+            }}
           />
+          {errors.orderDate && <p className="error">{errors.orderDate}</p>}
 
           <label>Shipped:</label>
           <select
             value={newOrder.hasShipped}
-            onChange={e => setNewOrder({ ...newOrder, hasShipped: e.target.value })}
+            onChange={e => {
+              setNewOrder({ ...newOrder, hasShipped: e.target.value });
+              setErrors({ ...errors, hasShipped: "" });
+            }}
           >
             <option value="">Select Status</option>
             <option value="1">Yes</option>
             <option value="0">No</option>
           </select>
+          {errors.hasShipped && <p className="error">{errors.hasShipped}</p>}
 
           <br />
           <button onClick={handleAdd}>Save</button>
-          <button onClick={() => setShowAddForm(false)}>Cancel</button>
+          <button onClick={() => { setShowAddForm(false); setErrors({}); }}>
+            Cancel
+          </button>
         </div>
       )}
 
