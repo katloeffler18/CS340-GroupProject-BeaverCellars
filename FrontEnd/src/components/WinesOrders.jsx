@@ -140,21 +140,24 @@ function WinesOrders(url) {
       body: JSON.stringify(payload),
     });
 
-    const selectedOrder = orders.find(o => o.orderID === Number(formData.orderID));
-    const selectedWine = wines.find(w => w.wineID === Number(formData.wineID));
-
-    setData(prev =>
-      prev.map(wo =>
-        wo.winesOrdersID === editingWine.winesOrdersID
-          ? {
-              ...wo,
-              ...formData,
-              memberName: selectedOrder ? selectedOrder.memberName : "",
-              wineName: selectedWine ? selectedWine.wineName : "",
-            }
-          : wo
-      )
-    );
+    woRes = await fetch(url.url + ":35827/winesorders");
+    woData = await woRes.json();
+    setData(woData);
+    // const selectedOrder = orders.find(o => o.orderID === Number(formData.orderID));
+    // const selectedWine = wines.find(w => w.wineID === Number(formData.wineID));
+    
+    // setData(prev =>
+    //   prev.map(wo =>
+    //     wo.winesOrdersID === editingWine.winesOrdersID
+    //       ? {
+    //           ...wo,
+    //           ...formData,
+    //           memberName: selectedOrder ? selectedOrder.memberName : "",
+    //           wineName: selectedWine ? selectedWine.wineName : "",
+    //         }
+    //       : wo
+    //   )
+    // );
 
     setEditingWine(null);
   };
