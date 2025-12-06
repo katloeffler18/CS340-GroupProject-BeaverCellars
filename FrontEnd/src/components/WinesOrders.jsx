@@ -2,7 +2,7 @@
 # WinesOrders Component
 # Date: 11/30/2025
 # Citation for use of AI Tools:
-  # Prompt: Help me implement add, edit, and delete functionality
+  # Prompt: Implement add/edit/delete functionality and add validation for both add/edit forms
   # AI Source URL: https://chatgpt.com/
 */
 
@@ -28,16 +28,16 @@ function WineOrderItem({ wineOrder, handleDelete, handleEdit }) {
 }
 
 function WinesOrders(url) {
-  const [data, setData] = useState([]); // WinesOrders table
-  const [orders, setOrders] = useState([]); // Orders table
-  const [wines, setWines] = useState([]); // Wines table
+  const [data, setData] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [wines, setWines] = useState([]);
+
   const [editingWine, setEditingWine] = useState(null);
 
   const [formData, setFormData] = useState({
     orderID: "",
     wineID: "",
     wineQuantity: "",
-    price: "",
   });
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -46,6 +46,8 @@ function WinesOrders(url) {
     wineID: "",
     wineQuantity: "",
   });
+
+  const [errors, setErrors] = useState({}); // shared for add + edit
 
   // Fetch all data
   useEffect(() => {
@@ -66,6 +68,7 @@ function WinesOrders(url) {
         setData(woData);
         setOrders(ordersData);
         setWines(winesData);
+
       } catch (err) {
         console.error("Error loading data:", err);
       }
@@ -84,22 +87,47 @@ function WinesOrders(url) {
 
   // Edit handler
   const handleEdit = (wineOrder) => {
+    setErrors({});
     setEditingWine(wineOrder);
     setFormData({
       orderID: wineOrder.orderID,
       wineID: wineOrder.wineID,
       wineQuantity: wineOrder.wineQuantity,
-      price: wineOrder.price,
     });
   };
 
-  // Handle input change
+  // Handle edit change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    // clear individual error
+    setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
 
-  // Submit update
+  // Validation (shared)
+  const validate = (wo) => {
+    let errs = {};
+
+    if (!wo.orderID) errs.orderID = "Order is required.";
+    if (!wo.wineID) errs.wineID = "Wine is required.";
+
+    if (!wo.wineQuantity) {
+      errs.wineQuantity = "Quantity is required.";
+    } else if (isNaN(wo.wineQuantity) || Number(wo.wineQuantity) <= 0) {
+      errs.wineQuantity = "Quantity must be a number greater than 0.";
+    }
+
+    return errs;
+  };
+
+  // Submit edit update
   const handleUpdate = async () => {
+    const validationErrors = validate(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     await fetch(url.url + `:35827/winesorders/${editingWine.winesOrdersID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -125,13 +153,22 @@ function WinesOrders(url) {
     setEditingWine(null);
   };
 
-  // Add new wine order
+  // ADD wine order
   const handleAdd = async () => {
+    const validationErrors = validate(newWine);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+
     const payload = {
-      orderID: parseInt(newWine.orderID, 10),
-      wineID: parseInt(newWine.wineID, 10),
-      wineQuantity: parseInt(newWine.wineQuantity, 10),
+      orderID: Number(newWine.orderID),
+      wineID: Number(newWine.wineID),
+      wineQuantity: Number(newWine.wineQuantity),
     };
+
     try {
       const response = await fetch(url.url + ":35827/winesorders", {
         method: "POST",
@@ -141,8 +178,8 @@ function WinesOrders(url) {
 
       const added = await response.json();
 
-      const selectedOrder = orders.find(o => o.orderID === Number(newWine.orderID));
-      const selectedWine = wines.find(w => w.wineID === Number(newWine.wineID));
+      const selectedOrder = orders.find(o => o.orderID === payload.orderID);
+      const selectedWine = wines.find(w => w.wineID === payload.wineID);
 
       added.memberName = selectedOrder ? selectedOrder.memberName : "";
       added.wineName = selectedWine ? selectedWine.wineName : "";
@@ -150,7 +187,7 @@ function WinesOrders(url) {
       setData(prev => [...prev, added]);
       setShowAddForm(false);
 
-      setNewWine({ orderID: "", wineID: "", wineQuantity: "", price: "" });
+      setNewWine({ orderID: "", wineID: "", wineQuantity: "" });
     } catch (err) {
       console.error("Add failed:", err);
     }
@@ -172,6 +209,7 @@ function WinesOrders(url) {
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {data.map(wo => (
             <WineOrderItem
@@ -184,14 +222,19 @@ function WinesOrders(url) {
         </tbody>
       </table>
 
-      <button onClick={() => setShowAddForm(true)}>Add Wine to Existing Order</button>
+      <button onClick={() => { setShowAddForm(true); setErrors({}); }}>
+        Add Wine to Existing Order
+      </button>
 
       {showAddForm && (
         <div className="form">
           <label>Order:</label>
           <select
             value={newWine.orderID}
-            onChange={(e) => setNewWine({ ...newWine, orderID: e.target.value })}
+            onChange={(e) => {
+              setNewWine({ ...newWine, orderID: e.target.value });
+              setErrors({ ...errors, orderID: "" });
+            }}
           >
             <option value="">Select Order</option>
             {orders.map(o => (
@@ -200,11 +243,15 @@ function WinesOrders(url) {
               </option>
             ))}
           </select>
+          {errors.orderID && <p className="error">{errors.orderID}</p>}
 
           <label>Wine:</label>
           <select
             value={newWine.wineID}
-            onChange={(e) => setNewWine({ ...newWine, wineID: e.target.value })}
+            onChange={(e) => {
+              setNewWine({ ...newWine, wineID: e.target.value });
+              setErrors({ ...errors, wineID: "" });
+            }}
           >
             <option value="">Select Wine</option>
             {wines.map(w => (
@@ -213,17 +260,24 @@ function WinesOrders(url) {
               </option>
             ))}
           </select>
+          {errors.wineID && <p className="error">{errors.wineID}</p>}
 
           <label>Quantity:</label>
           <input
             name="wineQuantity"
             value={newWine.wineQuantity}
-            onChange={(e) => setNewWine({ ...newWine, wineQuantity: e.target.value })}
+            onChange={(e) => {
+              setNewWine({ ...newWine, wineQuantity: e.target.value });
+              setErrors({ ...errors, wineQuantity: "" });
+            }}
           />
+          {errors.wineQuantity && <p className="error">{errors.wineQuantity}</p>}
 
           <br />
           <button onClick={handleAdd}>Save</button>
-          <button onClick={() => setShowAddForm(false)}>Cancel</button>
+          <button onClick={() => { setShowAddForm(false); setErrors({}); }}>
+            Cancel
+          </button>
         </div>
       )}
 
@@ -233,27 +287,29 @@ function WinesOrders(url) {
 
           <label>Order:</label>
           <select name="orderID" value={formData.orderID} onChange={handleChange}>
+            <option value="">Select Order</option>
             {orders.map(o => (
               <option key={o.orderID} value={o.orderID}>
                 {o.orderID} - {o.memberName}
               </option>
             ))}
           </select>
+          {errors.orderID && <p className="error">{errors.orderID}</p>}
 
           <label>Wine:</label>
           <select name="wineID" value={formData.wineID} onChange={handleChange}>
+            <option value="">Select Wine</option>
             {wines.map(w => (
               <option key={w.wineID} value={w.wineID}>
                 {w.wineName}
               </option>
             ))}
           </select>
+          {errors.wineID && <p className="error">{errors.wineID}</p>}
 
           <label>Quantity:</label>
           <input name="wineQuantity" value={formData.wineQuantity} onChange={handleChange} />
-
-          <label>Price:</label>
-          <input name="price" value={formData.price} onChange={handleChange} />
+          {errors.wineQuantity && <p className="error">{errors.wineQuantity}</p>}
 
           <br />
           <button onClick={handleUpdate}>Save</button>
