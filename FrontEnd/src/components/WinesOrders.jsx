@@ -140,8 +140,8 @@ function WinesOrders(url) {
       body: JSON.stringify(payload),
     });
 
-    woRes = await fetch(url.url + ":35827/winesorders");
-    woData = await woRes.json();
+    const woRes = await fetch(url.url + ":35827/winesorders");
+    const woData = await woRes.json();
     setData(woData);
     // const selectedOrder = orders.find(o => o.orderID === Number(formData.orderID));
     // const selectedWine = wines.find(w => w.wineID === Number(formData.wineID));
