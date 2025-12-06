@@ -331,7 +331,11 @@
                 `CALL sp_update_winesorder(?, ?, ?, ?)`,
                 [winesOrdersID, orderID, wineID, wineQuantity]
             );
-
+            await db.query(
+                `CALL sp_recalculate_order_total(?)`,
+                [orderID]
+            );
+            
             res.status(200).json({ message: 'Wine order updated' });
 
         } catch (error) {
