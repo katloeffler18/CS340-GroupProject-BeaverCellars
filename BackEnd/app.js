@@ -406,9 +406,7 @@
         try {
             const [rows] = await db.query("CALL ResetBeaverCellars()");
             await db.query(`
-            --------------------------------------------------------
-            -- Stored Procedure: Recalculate Order Total
-            --------------------------------------------------------
+
             DROP PROCEDURE IF EXISTS sp_recalculate_order_total;
             CREATE PROCEDURE sp_recalculate_order_total(IN p_orderID INT)
             BEGIN
@@ -424,11 +422,6 @@
                 WHERE orderID = p_orderID;
             END;
 
-            --------------------------------------------------------
-            -- TRIGGERS FOR WINESORDERS + ORDER TOTAL MANAGEMENT
-            --------------------------------------------------------
-
-            -- BEFORE INSERT: compute price from winePrice × quantity
             DROP TRIGGER IF EXISTS trg_winesorders_price_insert;
             CREATE TRIGGER trg_winesorders_price_insert
             BEFORE INSERT ON WinesOrders
@@ -443,7 +436,6 @@
                 SET NEW.price = base_price * NEW.wineQuantity;
             END;
 
-            -- BEFORE UPDATE: recompute price
             DROP TRIGGER IF EXISTS trg_winesorders_price_update;
             CREATE TRIGGER trg_winesorders_price_update
             BEFORE UPDATE ON WinesOrders
@@ -458,7 +450,6 @@
                 SET NEW.price = base_price * NEW.wineQuantity;
             END;
 
-            -- AFTER INSERT: recalc order total
             DROP TRIGGER IF EXISTS trg_order_total_after_insert;
             CREATE TRIGGER trg_order_total_after_insert
             AFTER INSERT ON WinesOrders
@@ -467,7 +458,6 @@
                 CALL sp_recalculate_order_total(NEW.orderID);
             END;
 
-            -- AFTER UPDATE: recalc order total
             DROP TRIGGER IF EXISTS trg_order_total_after_update;
             CREATE TRIGGER trg_order_total_after_update
             AFTER UPDATE ON WinesOrders
@@ -476,7 +466,6 @@
                 CALL sp_recalculate_order_total(NEW.orderID);
             END;
 
-            -- AFTER DELETE: recalc order total
             DROP TRIGGER IF EXISTS trg_order_total_after_delete;
             CREATE TRIGGER trg_order_total_after_delete
             AFTER DELETE ON WinesOrders
